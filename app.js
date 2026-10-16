@@ -128,11 +128,7 @@ function openPlanDialog() {
 }
 $('addPlanBtn')?.addEventListener('click', openPlanDialog);
 $('emptyAddPlanBtn')?.addEventListener('click', openPlanDialog);
-$('startWorkoutBtn').addEventListener('click', () => {
-  if (!plans.length) { openPlanDialog(); return; }
-  openTool('Workout guidato', `<div class="notice">Il database è pronto per le schede. Nel prossimo passaggio collegheremo gli esercizi alle schede e costruiremo la schermata guidata con serie, carichi e timer di recupero.</div><div class="tool-list">${plans.map(p=>`<article><strong>${escapeHtml(p.name)}</strong><p>${escapeHtml(p.description || 'Scheda personale')}</p><button class="secondary-button" data-plan="${p.id}">Seleziona scheda</button></article>`).join('')}</div>`);
-  $('toolContent').querySelectorAll('[data-plan]').forEach(btn => btn.addEventListener('click', () => openPlanDetails(plans.find(p=>p.id===btn.dataset.plan))));
-});
+$('startWorkoutBtn').addEventListener('click', () => openWorkoutChooser());
 $('closePlanDialog').addEventListener('click', () => $('planDialog').close());
 $('planForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -156,10 +152,11 @@ function openPlanDetails(plan) {
   toolBackAction = () => openPlansView();
   $('toolTitle').textContent = plan.name;
   $('toolContent').innerHTML = `<div class="page-intro"><p>${escapeHtml(plan.description || 'La tua scheda personale')}</p><span class="pill">${escapeHtml(plan.color || '#ff3038') === '#ff3038' ? 'SCHEDA PERSONALE' : 'PROGRAMMA PERSONALE'}</span></div>
-    <div class="section-heading page-section-heading"><div><p class="eyebrow">PROGRAMMA</p><h2>Esercizi della scheda</h2></div><button id="planAddExercise" class="primary-button compact" type="button">＋ Aggiungi esercizi</button></div>
+    <div class="plan-action-row"><button id="startThisPlan" class="primary-button start-plan-button" type="button">▶ Inizia allenamento</button><button id="planAddExercise" class="secondary-button" type="button">＋ Aggiungi esercizi</button></div><div class="section-heading page-section-heading"><div><p class="eyebrow">PROGRAMMA</p><h2>Esercizi della scheda</h2></div></div>
     <div class="plan-exercises" id="planExerciseList"><p class="muted">Caricamento esercizi della scheda…</p></div>`;
   showToolPage('plans');
   $('planAddExercise').addEventListener('click', () => openExerciseLibrary(plan));
+  $('startThisPlan').addEventListener('click', () => startGuidedWorkout(plan));
   loadPlanExercises(plan);
 }
 $('closeToolDialog').addEventListener('click', () => {
@@ -204,6 +201,69 @@ function openTool(tool, customContent = null) {
   showToolPage(nav);
 }
 
+let activeWorkout = null;
+let workoutTimerInterval = null;
+let workoutTimerRemaining = 0;
+function openWorkoutChooser(){
+  if(!plans.length){openPlanDialog();return;}
+  toolBackAction=()=>showDashboard();
+  openTool('Allenamento', `<div class="workout-intro"><p class="eyebrow">SESSIONE GUIDATA</p><h2>Quale scheda alleni oggi?</h2><p>Scegli una scheda per iniziare. Potrai registrare carichi e ripetizioni per ogni serie e usare il recupero integrato.</p></div><div class="plans-grid workout-plan-grid">${plans.map(p=>`<article class="plan-card"><div class="plan-card-icon">▶</div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'Scheda personale')}</p><button class="primary-button compact" type="button" data-start-plan="${p.id}">Inizia sessione →</button></article>`).join('')}</div>`);
+  $('toolContent').querySelectorAll('[data-start-plan]').forEach(b=>b.addEventListener('click',()=>startGuidedWorkout(plans.find(p=>p.id===b.dataset.startPlan))));
+}
+async function startGuidedWorkout(plan){
+  if(!plan||!currentUser)return;
+  const {data:rows,error}=await supabase.from('plan_exercises').select('*').eq('user_id',currentUser.id).eq('plan_id',plan.id).order('sort_order');
+  if(error){openTool('Allenamento',`<p class="status-message">Non riesco a caricare la scheda: ${escapeHtml(error.message)}</p>`);return;}
+  if(!rows?.length){openPlanDetails(plan);message('catalogMessage','Aggiungi almeno un esercizio alla scheda prima di iniziare.',true);return;}
+  const ids=rows.map(r=>r.exercise_id).filter(Boolean);
+  const {data:exercises,error:exErr}=await supabase.from('exercises').select('*').eq('user_id',currentUser.id).in('id',ids);
+  if(exErr){openTool('Allenamento',`<p class="status-message">Non riesco a caricare gli esercizi: ${escapeHtml(exErr.message)}</p>`);return;}
+  const map=new Map((exercises||[]).map(x=>[x.id,x]));
+  const items=rows.map(r=>({...r,exercise:map.get(r.exercise_id)})).filter(r=>r.exercise);
+  if(!items.length){openPlanDetails(plan);return;}
+  activeWorkout={plan,items,startedAt:new Date(),sets:items.map((it)=>Array.from({length:Math.max(1,Math.min(12,Number(it.sets)||3))},(_,i)=>({set_number:i+1,reps:Number(it.reps)||10,weight_kg:0,completed:false}))),sessionId:null};
+  if(workoutTimerInterval){clearInterval(workoutTimerInterval);workoutTimerInterval=null;}
+  toolBackAction=()=>openPlansView();
+  renderGuidedWorkout();
+}
+function renderGuidedWorkout(){
+  if(!activeWorkout)return;
+  const w=activeWorkout;
+  $('toolTitle').textContent='Allenamento in corso';
+  $('toolContent').innerHTML=`<section class="active-workout-header"><div><p class="eyebrow">SESSIONE ATTIVA</p><h2>${escapeHtml(w.plan.name)}</h2><p class="muted">${w.items.length} esercizi · modifica carichi e ripetizioni mentre ti alleni</p></div><div class="live-pill"><i></i> IN CORSO</div></section><div class="workout-toolbar"><label>Recupero predefinito (sec)<input id="workoutRestDefault" type="number" min="0" max="600" step="5" value="90"></label><div class="rest-clock" id="restClock"><span>RECUPERO</span><strong id="restTime">01:30</strong><button id="timerToggle" class="secondary-button" type="button">▶ Avvia timer</button><button id="timerReset" class="text-button" type="button">Azzera</button></div></div><div class="guided-exercise-list">${w.items.map((it,i)=>{const x=it.exercise;return `<article class="guided-exercise" data-ex-index="${i}"><div class="guided-exercise-top"><div class="guided-exercise-art">${exerciseVisual(x)}</div><div class="guided-exercise-info"><span class="exercise-number">ESERCIZIO ${String(i+1).padStart(2,'0')}</span><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.muscle_group||'Altro')} · ${escapeHtml(x.equipment||'Attrezzatura varia')}</p><details><summary>Come si esegue</summary><p>${escapeHtml(exerciseGuide(x))}</p></details></div></div><div class="sets-table-wrap"><table class="sets-table"><thead><tr><th>Serie</th><th>Kg</th><th>Rip.</th><th>Fatta</th></tr></thead><tbody>${w.sets[i].map((set,j)=>`<tr data-set-row="${j}"><td>${j+1}</td><td><input aria-label="Chili serie ${j+1}" data-field="weight_kg" type="number" min="0" max="1000" step="0.5" value="${set.weight_kg}" inputmode="decimal"></td><td><input aria-label="Ripetizioni serie ${j+1}" data-field="reps" type="number" min="1" max="200" step="1" value="${set.reps}" inputmode="numeric"></td><td><button class="set-done ${set.completed?'is-done':''}" data-complete-set="${j}" type="button" aria-label="Segna serie ${j+1} completata">${set.completed?'✓':'○'}</button></td></tr>`).join('')}</tbody></table></div><div class="exercise-set-footer"><button class="secondary-button add-set-btn" data-add-set="${i}" type="button">＋ Aggiungi serie</button><span class="set-progress">${w.sets[i].filter(s=>s.completed).length}/${w.sets[i].length} serie completate</span></div></article>`}).join('')}</div><div class="finish-workout-panel"><div><p class="eyebrow">OTTIMO LAVORO</p><h3>Hai finito la sessione?</h3><p>Salveremo durata, serie, ripetizioni e carichi registrati.</p></div><button id="finishWorkoutBtn" class="primary-button finish-workout-button" type="button">✓ Completa allenamento</button><button id="cancelWorkoutBtn" class="secondary-button" type="button">Esci senza completare</button><p id="workoutSaveMessage" class="status-message"></p></div>`;
+  showToolPage('workout');
+  $('toolContent').querySelectorAll('[data-ex-index]').forEach(card=>{const i=Number(card.dataset.exIndex);card.querySelectorAll('[data-field]').forEach(input=>input.addEventListener('change',()=>{const j=Number(input.closest('[data-set-row]').dataset.setRow);activeWorkout.sets[i][j][input.dataset.field]=Number(input.value)||0;}));card.querySelectorAll('[data-complete-set]').forEach(btn=>btn.addEventListener('click',()=>{const j=Number(btn.dataset.completeSet);const set=activeWorkout.sets[i][j];set.completed=!set.completed;const val=Number($('workoutRestDefault').value)||90;if(set.completed&&val>0)startRestTimer(val);renderGuidedWorkoutPreserveScroll();}));});
+  $('toolContent').querySelectorAll('[data-add-set]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.addSet);if(activeWorkout.sets[i].length>=20)return;activeWorkout.sets[i].push({set_number:activeWorkout.sets[i].length+1,reps:10,weight_kg:0,completed:false});renderGuidedWorkoutPreserveScroll();}));
+  $('timerToggle').addEventListener('click',()=>{if(workoutTimerInterval){clearInterval(workoutTimerInterval);workoutTimerInterval=null;$('timerToggle').textContent='▶ Riprendi timer';}else startRestTimer(workoutTimerRemaining||Number($('workoutRestDefault').value)||90);});
+  $('timerReset').addEventListener('click',()=>{if(workoutTimerInterval)clearInterval(workoutTimerInterval);workoutTimerInterval=null;workoutTimerRemaining=Number($('workoutRestDefault').value)||90;updateRestClock();});
+  $('finishWorkoutBtn').addEventListener('click',finishGuidedWorkout);
+  $('cancelWorkoutBtn').addEventListener('click',()=>{if(confirm('Uscire senza salvare questa sessione?')){if(workoutTimerInterval)clearInterval(workoutTimerInterval);workoutTimerInterval=null;activeWorkout=null;openWorkoutChooser();}});
+  workoutTimerRemaining=Number($('workoutRestDefault').value)||90;updateRestClock();
+}
+function renderGuidedWorkoutPreserveScroll(){const y=window.scrollY;renderGuidedWorkout();requestAnimationFrame(()=>window.scrollTo(0,y));}
+function startRestTimer(seconds){if(workoutTimerInterval)clearInterval(workoutTimerInterval);workoutTimerRemaining=Math.max(0,Number(seconds)||0);updateRestClock();$('timerToggle').textContent='Ⅱ Pausa timer';if(workoutTimerRemaining<=0)return;workoutTimerInterval=setInterval(()=>{workoutTimerRemaining=Math.max(0,workoutTimerRemaining-1);updateRestClock();if(workoutTimerRemaining<=0){clearInterval(workoutTimerInterval);workoutTimerInterval=null;const clock=$('restClock');if(clock){clock.classList.add('timer-finished');$('timerToggle').textContent='↻ Riavvia timer';if(navigator.vibrate)navigator.vibrate([150,80,150]);}}},1000);}
+function updateRestClock(){const el=$('restTime');if(el)el.textContent=`${String(Math.floor(workoutTimerRemaining/60)).padStart(2,'0')}:${String(workoutTimerRemaining%60).padStart(2,'0')}`;const clock=$('restClock');if(clock&&workoutTimerRemaining>0)clock.classList.remove('timer-finished');}
+async function finishGuidedWorkout(){
+  const w=activeWorkout;if(!w||!currentUser)return;
+  const btn=$('finishWorkoutBtn');btn.disabled=true;btn.textContent='Salvataggio…';message('workoutSaveMessage','Salvo la sessione e le serie…');
+  const endedAt=new Date();const duration=Math.max(0,Math.round((endedAt-w.startedAt)/1000));
+  try{
+    const {data:session,error:sessionErr}=await supabase.from('workout_sessions').insert({user_id:currentUser.id,plan_id:w.plan.id,plan_name:w.plan.name,started_at:w.startedAt.toISOString(),finished_at:endedAt.toISOString(),duration_seconds:duration,status:'completed'}).select().single();
+    if(sessionErr)throw new Error('Sessione non salvata: '+sessionErr.message);
+    for(let i=0;i<w.items.length;i++){
+      const item=w.items[i];
+      const {data:sessionExercise,error:seErr}=await supabase.from('session_exercises').insert({user_id:currentUser.id,session_id:session.id,exercise_id:item.exercise.id,exercise_name:item.exercise.name,position:i+1,rest_seconds:Number(item.rest_seconds)||90}).select().single();
+      if(seErr)throw new Error('Sessione creata, ma non riesco a salvare gli esercizi: '+seErr.message);
+      const payload=w.sets[i].map((set,j)=>({user_id:currentUser.id,session_exercise_id:sessionExercise.id,set_number:j+1,reps:set.reps,weight_kg:set.weight_kg,completed:set.completed}));
+      const {error:setErr}=await supabase.from('workout_sets').insert(payload);
+      if(setErr)throw new Error('Sessione creata, ma non riesco a salvare le serie: '+setErr.message);
+    }
+    if(workoutTimerInterval)clearInterval(workoutTimerInterval);workoutTimerInterval=null;activeWorkout=null;
+    $('toolTitle').textContent='Allenamento completato';$('toolContent').innerHTML=`<section class="workout-complete"><div class="complete-check">✓</div><p class="eyebrow">SESSIONE SALVATA</p><h2>Allenamento completato.</h2><p>${escapeHtml(w.plan.name)} · ${Math.floor(duration/60)} min ${duration%60} sec</p><div class="complete-stats"><div><strong>${w.items.length}</strong><span>Esercizi</span></div><div><strong>${w.sets.reduce((n,sets)=>n+sets.filter(s=>s.completed).length,0)}</strong><span>Serie completate</span></div><div><strong>${w.sets.reduce((n,sets)=>n+sets.filter(s=>s.completed).reduce((t,s)=>t+(Number(s.weight_kg)||0)*(Number(s.reps)||0),0),0).toLocaleString('it-IT')}</strong><span>Volume indicativo kg×rip.</span></div></div><button id="backHomeAfterWorkout" class="primary-button" type="button">Torna alla Home →</button><button id="viewHistoryAfterWorkout" class="secondary-button" type="button">Vai allo storico</button></section>`;
+    $('backHomeAfterWorkout').addEventListener('click',async()=>{await loadDashboardData();showDashboard();});$('viewHistoryAfterWorkout').addEventListener('click',()=>openTool('Storico allenamenti'));await loadDashboardData();
+  }catch(err){message('workoutSaveMessage',err.message||'Errore durante il salvataggio.',true);btn.disabled=false;btn.textContent='Riprova salvataggio';}
+}
+
 let activePlanForExercise = null;
 let exerciseTab = 'catalog';
 const MUSCLE_ICONS = {Petto:'🏋️',Schiena:'🧗',Spalle:'💪',Bicipiti:'💪',Tricipiti:'💪',Gambe:'🦵',Glutei:'🏃',Polpacci:'🦵',Addome:'🎯',Cardio:'❤️',Avambracci:'✊',Altro:'🏋️'};
@@ -230,8 +290,25 @@ function exerciseGuide(item) {
   return 'Prepara l’attrezzatura e scegli un carico che consenta di mantenere una tecnica pulita. Esegui la fase di spinta o trazione con controllo, torna lentamente alla posizione iniziale e interrompi la serie se perdi la postura o senti dolore.';
 }
 function exerciseVisual(item) {
-  if (item.image) return `<img class="exercise-photo" loading="lazy" src="${escapeHtml(item.image)}" alt="Dimostrazione: ${escapeHtml(item.name)}" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">`;
-  return '';
+  const hasPhoto=Boolean(item.image);
+  const n=(item.name||'').toLocaleLowerCase('it'), eq=(item.equipment||'').toLocaleLowerCase('it');
+  let figure='bench';
+  if (/leg press|leg extension|leg curl|abduction|adduction|calf raise|hack squat|pendulum squat/.test(n) || /macchina/.test(eq) && /gambe|glutei|polpacci/.test(item.muscle_group||'')) figure='machine';
+  else if (/squat|stacco|deadlift|affondi|lunge|step-up|hip thrust|glute bridge/.test(n)) figure='squat';
+  else if (/lat machine|pulldown|trazioni|pull-up|pulley|rematore|row|cable|cavi|face pull/.test(n) || /cavi|cable/.test(eq)) figure='cable';
+  else if (/curl|alzate|croci|fly|press manubri|manubri/.test(n) || /manubri|manubrio/.test(eq)) figure='dumbbell';
+  else if (/plank|push-up|push up|crunch|sit-up|mountain climber|burpee/.test(n)) figure='floor';
+  const common=`<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ff5962"/><stop offset="1" stop-color="#a80e1b"/></linearGradient></defs><rect x="0" y="0" width="320" height="210" rx="18" fill="#15161b"/><circle cx="260" cy="28" r="70" fill="#ff3038" opacity=".08"/><path d="M18 184H302" stroke="#393b43" stroke-width="2"/>`;
+  let art='';
+  if(figure==='bench') art=`<path d="M58 158H258M84 158L72 183M230 158L244 183" stroke="#858a96" stroke-width="8" stroke-linecap="round"/><rect x="94" y="127" width="130" height="12" rx="5" fill="#777d88"/><path d="M112 120L156 108L196 124" stroke="#e1e4ea" stroke-width="15" stroke-linecap="round"/><circle cx="105" cy="119" r="12" fill="#d7dbe2"/><path d="M160 111L172 145" stroke="#d7dbe2" stroke-width="12" stroke-linecap="round"/><path d="M173 145L197 154" stroke="#d7dbe2" stroke-width="10" stroke-linecap="round"/><path d="M65 73H255" stroke="#d9dde5" stroke-width="6" stroke-linecap="round"/><path d="M85 54V92M98 48V98M222 54V92M235 48V98" stroke="url(#g)" stroke-width="9" stroke-linecap="round"/><path d="M161 75L148 105M161 75L177 105" stroke="#ff3038" stroke-width="5" stroke-linecap="round"/>`;
+  else if(figure==='machine') art=`<path d="M72 45V172M72 45H145M145 45V72M72 172H248M248 172V64" stroke="#818794" stroke-width="8" stroke-linecap="round"/><rect x="136" y="88" width="66" height="12" rx="4" fill="#6e7480"/><rect x="136" y="104" width="66" height="12" rx="4" fill="#6e7480"/><path d="M126 122L166 116L191 137" stroke="#dce0e7" stroke-width="14" stroke-linecap="round"/><circle cx="116" cy="117" r="12" fill="#dce0e7"/><path d="M191 137L230 137" stroke="#ff3038" stroke-width="12" stroke-linecap="round"/><path d="M145 144L135 170M191 137L202 166" stroke="#dce0e7" stroke-width="10" stroke-linecap="round"/><rect x="215" y="58" width="24" height="65" rx="6" fill="url(#g)"/>`;
+  else if(figure==='squat') art=`<path d="M70 62H250" stroke="#d9dde5" stroke-width="6" stroke-linecap="round"/><path d="M90 44V80M105 38V86M215 44V80M230 38V86" stroke="url(#g)" stroke-width="9" stroke-linecap="round"/><circle cx="160" cy="76" r="14" fill="#e3e6ec"/><path d="M160 91L160 126L132 143L112 168M160 126L188 143L207 166" stroke="#e3e6ec" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M160 103L132 118M160 103L188 118" stroke="#ff3038" stroke-width="10" stroke-linecap="round"/><path d="M112 168H95M207 166H225" stroke="#ff3038" stroke-width="8" stroke-linecap="round"/>`;
+  else if(figure==='cable') art=`<path d="M75 40V174M75 40H116M75 174H245M245 40V174" stroke="#858b97" stroke-width="8" stroke-linecap="round"/><rect x="91" y="55" width="26" height="78" rx="5" fill="url(#g)"/><circle cx="171" cy="74" r="13" fill="#e1e4ea"/><path d="M171 88L171 128M171 100L137 112L111 91M171 128L147 161M171 128L199 160" stroke="#e1e4ea" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M110 91L137 112" stroke="#ff3038" stroke-width="5"/><path d="M117 69L150 92" stroke="#ff3038" stroke-width="3" stroke-dasharray="4 4"/>`;
+  else if(figure==='dumbbell') art=`<circle cx="160" cy="56" r="14" fill="#e1e4ea"/><path d="M160 72L160 123M160 87L128 110L109 136M160 87L192 108L209 132M160 123L139 165M160 123L184 164" stroke="#e1e4ea" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M108 136L94 136M209 132L225 132" stroke="#ff3038" stroke-width="7" stroke-linecap="round"/><path d="M112 120V151M101 125V146M215 116V147M226 121V142" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>`;
+  else art=`<circle cx="160" cy="60" r="14" fill="#e1e4ea"/><path d="M151 77L126 108L95 125M151 77L181 105L214 118M126 108L158 132L196 151" stroke="#e1e4ea" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M95 125L81 132M214 118L229 123" stroke="#ff3038" stroke-width="7" stroke-linecap="round"/>`;
+  const illustration=`<div class="exercise-art exercise-illustration" role="img" aria-label="Illustrazione tecnica per ${escapeHtml(item.name)}"><svg viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${common}${art}<text x="18" y="202" fill="#ff747b" font-size="8" letter-spacing="1.8">MARCHESANO GYM · MOVEMENT GUIDE</text></svg></div>`;
+  if(hasPhoto) return `<div class="exercise-visual-inner"><img class="exercise-photo" loading="lazy" src="${escapeHtml(item.image)}" alt="Dimostrazione: ${escapeHtml(item.name)}" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="exercise-photo-fallback" style="display:none">${illustration}</div></div>`;
+  return illustration;
 }
 function openExerciseLibrary(plan = null) {
   activePlanForExercise = plan;
@@ -269,7 +346,7 @@ function renderExerciseCatalog() {
     const idx = EXERCISE_CATALOG.indexOf(x); const icon = MUSCLE_ICONS[x.muscle_group] || MUSCLE_ICONS.Altro;
     const description = exerciseGuide(x); const muscleDesc = MUSCLE_DESCRIPTIONS[x.muscle_group] || 'Muscoli coinvolti secondo la variante e la tecnica utilizzata.';
     const visual = exerciseVisual(x);
-    return `<article class="exercise-card exercise-library-card"><div class="exercise-visual">${visual}<div class="exercise-art" ${x.image ? 'style="display:none"' : ''}><span>${icon}</span><small>${escapeHtml(x.muscle_group || 'FITNESS').toLocaleUpperCase('it')}</small></div></div><div class="exercise-card-content"><div class="exercise-card-title"><div><h3>${escapeHtml(x.name)}</h3><p>${icon} ${escapeHtml(x.muscle_group || 'Altro')} <span>·</span> ${escapeHtml(x.equipment || 'Attrezzatura varia')}</p></div></div><details class="exercise-details"><summary>Muscoli e istruzioni</summary><div class="exercise-description"><strong>Muscoli coinvolti</strong><p>${escapeHtml(muscleDesc)}</p><strong>Come eseguirlo</strong><p>${escapeHtml(description)}</p>${x.source === 'wger' ? '<small>Fonte: wger · immagine/descrizione di origine pubblica quando disponibile.</small>' : ''}</div></details><button class="exercise-add-button full-add" type="button" data-catalog-index="${idx}">${activePlanForExercise ? '＋ Aggiungi alla scheda' : '＋ Aggiungi a una scheda'}</button></div></article>`;
+    return `<article class="exercise-card exercise-library-card"><div class="exercise-visual">${visual}</div><div class="exercise-card-content"><div class="exercise-card-title"><div><h3>${escapeHtml(x.name)}</h3><p>${icon} ${escapeHtml(x.muscle_group || 'Altro')} <span>·</span> ${escapeHtml(x.equipment || 'Attrezzatura varia')}</p></div></div><button class="exercise-open-detail" type="button" data-open-exercise="${idx}">Apri scheda esercizio ↗</button><details class="exercise-details"><summary>Muscoli e istruzioni</summary><div class="exercise-description"><strong>Muscoli coinvolti</strong><p>${escapeHtml(muscleDesc)}</p><strong>Come eseguirlo</strong><p>${escapeHtml(description)}</p>${x.source === 'wger' ? '<small>Fonte: wger · immagine/descrizione di origine pubblica quando disponibile.</small>' : ''}</div></details><button class="exercise-add-button full-add" type="button" data-catalog-index="${idx}">${activePlanForExercise ? '＋ Aggiungi alla scheda' : '＋ Aggiungi a una scheda'}</button></div></article>`;
   }).join('');
   $('catalogLoadMore').classList.toggle('hidden', rows.length <= catalogLimit);
   list.querySelectorAll('[data-catalog-index]').forEach(btn => btn.addEventListener('click', async () => {
@@ -279,7 +356,16 @@ function renderExerciseCatalog() {
     try { const saved = await ensureUserExercise(item); await addExerciseToPlan(activePlanForExercise, saved); message('catalogMessage', `${item.name} aggiunto alla scheda.`); await loadPlanExercises(activePlanForExercise); }
     catch (err) { message('catalogMessage', err.message || 'Impossibile aggiungere l’esercizio.', true); }
     finally { btn.disabled = false; btn.textContent = '＋ Aggiungi alla scheda'; }
-  }));
+  }));  list.querySelectorAll('[data-open-exercise]').forEach(btn=>btn.addEventListener('click',()=>openExerciseDetail(EXERCISE_CATALOG[Number(btn.dataset.openExercise)])));
+}
+function openExerciseDetail(item){
+  if(!item)return;
+  const plan=activePlanForExercise;
+  toolBackAction=()=>openExerciseLibrary(plan);
+  openTool(item.name,`<section class="exercise-detail-page"><button id="detailBackToLibrary" class="secondary-button" type="button">← Torna agli esercizi</button><div class="exercise-detail-hero">${exerciseVisual(item)}</div><div class="exercise-detail-heading"><p class="eyebrow">GUIDA ALL’ESERCIZIO</p><h2>${escapeHtml(item.name)}</h2><div class="exercise-detail-tags"><span>${escapeHtml(item.muscle_group||'Altro')}</span><span>${escapeHtml(item.equipment||'Attrezzatura varia')}</span></div></div><div class="exercise-detail-panel"><p class="eyebrow">MUSCOLI COINVOLTI</p><p>${escapeHtml(MUSCLE_DESCRIPTIONS[item.muscle_group]||'Muscoli coinvolti in base alla variante e alla tecnica.')}</p><p class="eyebrow">ESECUZIONE CORRETTA</p><p>${escapeHtml(exerciseGuide(item))}</p><p class="exercise-safety-note">Scegli un carico controllabile e interrompi in caso di dolore. La tecnica viene prima del peso.</p></div><button id="detailAddExercise" class="primary-button" type="button">＋ ${plan?'Aggiungi a questa scheda':'Aggiungi a una scheda'} <span>→</span></button></section>`);
+  showToolPage('exercises');
+  $('detailBackToLibrary')?.addEventListener('click',()=>openExerciseLibrary(plan));
+  $('detailAddExercise')?.addEventListener('click',async()=>{const btn=$('detailAddExercise');btn.disabled=true;btn.textContent='Salvataggio…';try{const saved=await ensureUserExercise(item);if(plan){await addExerciseToPlan(plan,saved);openPlanDetails(plan);message('catalogMessage',`${item.name} aggiunto alla scheda.`);}else openPlanPickerForExercise(item);}catch(err){btn.disabled=false;btn.innerHTML=`＋ ${plan?'Aggiungi a questa scheda':'Aggiungi a una scheda'} <span>→</span>`;const p=document.createElement('p');p.className='status-message';p.textContent=err.message||'Non riesco ad aggiungere l’esercizio.';$('toolContent').append(p);}});
 }
 function openPlanPickerForExercise(item) {
   const previousBack = () => openExerciseLibrary(null);
@@ -399,7 +485,7 @@ async function loadHistory() {
   const { data, error } = await supabase.from('workout_sessions').select('*').eq('user_id',currentUser.id).order('started_at',{ascending:false}).limit(50);
   const el = $('historyList'); if (!el) return;
   if (error) { el.innerHTML = `<p class="status-message">${escapeHtml(error.message)}</p>`; return; }
-  el.innerHTML = data.length ? data.map(s=>`<article><strong>${escapeHtml(s.plan_name)}</strong><p>${new Date(s.started_at).toLocaleString('it-IT')} · ${escapeHtml(s.status)}</p></article>`).join('') : '<p class="muted">Gli allenamenti completati appariranno qui.</p>';
+  el.innerHTML = data.length ? data.map(s=>`<article class="history-session-card"><div><strong>${escapeHtml(s.plan_name||'Allenamento')}</strong><p>${new Date(s.started_at).toLocaleString('it-IT')} · ${escapeHtml(s.status||'completato')}</p></div><span>${s.duration_seconds?`${Math.floor(s.duration_seconds/60)} min`:''}</span></article>`).join('') : '<p class="muted">Gli allenamenti completati appariranno qui.</p>'; 
 }
 async function loadSchedule() {
   const { data, error } = await supabase.from('scheduled_workouts').select('*').eq('user_id',currentUser.id).order('scheduled_at').limit(50);
@@ -435,7 +521,7 @@ function openPlansView() {
   $('toolContent').querySelectorAll('[data-open-plan]').forEach(btn=>btn.addEventListener('click',()=>openPlanDetails(plans.find(p=>p.id===btn.dataset.openPlan))));
 }
 function openProfileView() {
-  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=10" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="text-button" type="button">Esci dal tuo account</button></div>`);
+  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=11" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="text-button" type="button">Esci dal tuo account</button></div>`);
   $('profileMeasures')?.addEventListener('click',()=>openTool('Peso e misure'));
   $('profileCalendar')?.addEventListener('click',()=>openTool('Calendario'));
   $('profileLogout')?.addEventListener('click',async()=>{await supabase.auth.signOut();currentUser=null;showAuth();});

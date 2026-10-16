@@ -1,8 +1,8 @@
-const CACHE = 'marchesano-gym-v10-full-pages-exercise-catalog';
+const CACHE = 'marchesano-gym-v12-guided-workout';
 const CORE = [
   './', './index.html', './styles.css?v=10', './app.js?v=10', './manifest.webmanifest?v=10',
   './apple-touch-icon.png?v=10', './icon-192.png?v=10', './icon-512.png?v=10',
-  './logo-mark.png?v=10', './marchesano-gym-logo.png?v=10'
+  './logo-mark.png?v=10', './marchesano-gym-v12-guided-workout'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
