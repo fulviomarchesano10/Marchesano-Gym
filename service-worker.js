@@ -1,7 +1,7 @@
-const CACHE = 'marchesano-gym-v8-library';
+const CACHE = 'marchesano-gym-v9-visual-refresh';
 const CORE = [
-  './', './index.html', './styles.css?v=13', './app.js?v=13', './manifest.webmanifest?v=13',
-  './apple-touch-icon.png', './icon-192.png?v=13', './icon-512.png?v=13',
+  './', './index.html', './styles.css?v=14', './app.js?v=14', './manifest.webmanifest?v=14',
+  './apple-touch-icon.png', './icon-192.png?v=14', './icon-512.png?v=14',
   './logo-mark.png', './marchesano-gym-logo.png'
 ];
 self.addEventListener('install', event => {

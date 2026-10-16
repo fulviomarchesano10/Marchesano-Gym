@@ -5,28 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=12">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=14">
   <meta name="theme-color" content="#101114">
   <meta name="description" content="Marchesano Gym — il tuo sistema personale di allenamento.">
-  <link rel="manifest" href="./manifest.webmanifest?v=13">
-  <link rel="icon" href="./icon-192.png?v=12" type="image/png">
-  <link rel="stylesheet" href="./styles.css?v=13">
+  <link rel="manifest" href="./manifest.webmanifest?v=14">
+  <link rel="icon" href="./icon-192.png?v=14" type="image/png">
+  <link rel="stylesheet" href="./styles.css?v=14">
   <title>Marchesano Gym</title>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="./" aria-label="Marchesano Gym home">
-        <img class="brand-logo" src="./logo-mark.png?v=12" alt="Logo Marchesano Gym">
+        <img class="brand-logo" src="./logo-mark.png?v=14" alt="Logo Marchesano Gym">
         <span><strong>MARCHESANO <em>GYM</em></strong><small>YOUR PERSONAL TRAINING SYSTEM</small></span>
       </a>
-      <button id="logoutBtn" class="icon-button hidden" aria-label="Esci" title="Esci">↗</button>
+      <div class="account-area">
+        <button id="accountBtn" class="account-button hidden" type="button" aria-expanded="false" aria-controls="accountMenu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg><span>Profilo</span><svg class="account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg></button>
+        <div id="accountMenu" class="account-menu hidden" role="region" aria-label="Account personale">
+          <p class="eyebrow">ACCOUNT PERSONALE</p><strong id="accountEmail">—</strong>
+          <button id="accountLogoutBtn" type="button" class="account-logout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Logout</button>
+        </div>
+      </div>
     </header>
 
     <main>
       <section id="authView" class="auth-layout">
         <div class="hero-copy">
-          <img class="hero-logo" src="./marchesano-gym-logo.png?v=12" alt="Marchesano Gym — logo rosso e nero">
+          <img class="hero-logo" src="./marchesano-gym-logo.png?v=14" alt="Marchesano Gym — logo rosso e nero">
           <p class="eyebrow">DISCIPLINA. COSTANZA. PROGRESSI.</p>
           <h1>Costruisci<br>la tua <span>forza.</span></h1>
           <p class="muted">Le tue schede, i tuoi carichi e ogni allenamento, in un unico posto.</p>
@@ -49,29 +55,29 @@
         <div class="welcome-row">
           <div class="welcome-copy"><p class="eyebrow">IL TUO SPAZIO PERSONALE</p><h1>Pronto ad allenarti<span class="accent">.</span></h1><p id="todayLabel" class="muted"></p></div>
         </div>
-        <button id="startWorkoutBtn" class="primary-button start-workout"><span class="start-icon">▶</span><span class="start-copy"><strong>Inizia allenamento</strong><small>Riprendi il controllo dei tuoi progressi</small></span><span class="start-arrow">→</span></button>
+        <button id="startWorkoutBtn" class="primary-button start-workout"><span class="start-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"></path><path d="M9 5v14"></path></svg></span><span class="start-copy"><strong>Inizia allenamento</strong><small>Riprendi il controllo dei tuoi progressi</small></span><span class="start-arrow">→</span></button>
         <div class="mini-stats">
-          <button class="mini-stat" data-nav="plans"><span class="mini-stat-icon">▦</span><strong id="plansCount">0</strong><small>Schede</small></button>
-          <button class="mini-stat" data-nav="history"><span class="mini-stat-icon">↗</span><strong id="sessionsCount">0</strong><small>Sessioni</small></button>
-          <button class="mini-stat" data-nav="profile"><span class="mini-stat-icon">⌁</span><strong id="bodyWeight">—</strong><small>Peso attuale</small></button>
+          <button class="mini-stat" data-nav="plans"><span class="mini-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path></svg></span><strong id="plansCount">0</strong><small>Schede</small></button>
+          <button class="mini-stat" data-nav="history"><span class="mini-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span><strong id="sessionsCount">0</strong><small>Sessioni</small></button>
+          <button class="mini-stat" data-nav="profile"><span class="mini-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M7 15l4-4 3 2 5-6"></path></svg></span><strong id="bodyWeight">—</strong><small>Peso attuale</small></button>
         </div>
         <div class="quick-heading"><div><p class="eyebrow">ACCESSO RAPIDO</p><h2>Tutto il tuo allenamento</h2></div></div>
         <div class="quick-grid">
-          <button class="quick-card" data-action="plans"><span class="quick-icon">▦</span><span><strong>Le mie schede</strong><small>Crea e consulta i programmi</small></span><b>→</b></button>
-          <button class="quick-card" data-action="exercises"><span class="quick-icon">▤</span><span><strong>Esercizi</strong><small>La tua libreria personale</small></span><b>→</b></button>
-          <button class="quick-card" data-action="history"><span class="quick-icon">◷</span><span><strong>Storico</strong><small>Le sessioni completate</small></span><b>→</b></button>
-          <button class="quick-card" data-action="profile"><span class="quick-icon">⌁</span><span><strong>Profilo e misure</strong><small>Peso e progressi fisici</small></span><b>→</b></button>
+          <button class="quick-card" data-action="plans"><span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path></svg></span><span><strong>Le mie schede</strong><small>Crea e consulta i programmi</small></span><b>→</b></button>
+          <button class="quick-card" data-action="exercises"><span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h16M4 20h16"></path><path d="M7 3v19M17 3v19"></path></svg></span><span><strong>Esercizi</strong><small>La tua libreria personale</small></span><b>→</b></button>
+          <button class="quick-card" data-action="history"><span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span><span><strong>Storico</strong><small>Le sessioni completate</small></span><b>→</b></button>
+          <button class="quick-card" data-action="profile"><span class="quick-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span><span><strong>Profilo e misure</strong><small>Peso e progressi fisici</small></span><b>→</b></button>
         </div>
         <p id="dashboardMessage" class="status-message" role="status"></p>
       </section>
     </main>
     <nav id="bottomNav" class="bottom-nav hidden" aria-label="Navigazione">
-      <button class="active" data-nav="home"><span>⌂</span>Home</button>
-      <button data-nav="plans"><span>▦</span>Schede</button>
-      <button data-nav="workout"><span>▶</span>Allenamento</button>
-      <button data-nav="exercises"><span>▤</span>Esercizi</button>
-      <button data-nav="history"><span>◷</span>Storico</button>
-      <button data-nav="profile"><span>●</span>Profilo</button>
+      <button class="active" data-nav="home"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"></path></svg></span>Home</button>
+      <button data-nav="plans"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path></svg></span>Schede</button>
+      <button data-nav="workout"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"></path><path d="M9 5v14"></path></svg></span>Allenamento</button>
+      <button data-nav="exercises"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h16M4 20h16"></path><path d="M7 3v19M17 3v19"></path></svg></span>Esercizi</button>
+      <button data-nav="history"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>Storico</button>
+      <button data-nav="profile"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span>Profilo</button>
     </nav>
   </div>
 
@@ -90,6 +96,6 @@
     <div class="page-heading"><div><p class="eyebrow">MARCHESANO GYM</p><h1 id="toolTitle">Sezione</h1></div><button type="button" class="back-button" id="closeToolDialog">← Indietro</button></div>
     <div id="toolContent"></div>
   </section>
-  <script type="module" src="./app.js?v=13"></script>
+  <script type="module" src="./app.js?v=14"></script>
 </body>
 </html>

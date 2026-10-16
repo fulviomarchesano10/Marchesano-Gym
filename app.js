@@ -30,7 +30,7 @@ function showAuth() {
   $('dashboardView').classList.add('hidden');
   $('toolDialog').classList.add('hidden');
   $('bottomNav').classList.add('hidden');
-  $('logoutBtn').classList.add('hidden');
+  $('accountBtn').classList.add('hidden'); $('accountMenu').classList.add('hidden');
   activePage = 'home';
 }
 function showDashboard() {
@@ -38,7 +38,7 @@ function showDashboard() {
   $('toolDialog').classList.add('hidden');
   $('dashboardView').classList.remove('hidden');
   $('bottomNav').classList.remove('hidden');
-  $('logoutBtn').classList.remove('hidden');
+  $('accountBtn').classList.remove('hidden'); $('accountEmail').textContent = currentUser?.email || 'Account personale';
   activePage = 'home';
   document.querySelectorAll('#bottomNav [data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === 'home'));
   $('todayLabel').textContent = new Intl.DateTimeFormat('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(new Date());
@@ -79,7 +79,21 @@ $('authForm').addEventListener('submit', async (e) => {
     $('authSubmit').disabled = false;
   }
 });
-$('logoutBtn').addEventListener('click', async () => { await supabase.auth.signOut(); currentUser = null; showAuth(); });
+$('accountBtn').addEventListener('click', () => {
+  const menu = $('accountMenu');
+  const willOpen = menu.classList.contains('hidden');
+  menu.classList.toggle('hidden', !willOpen);
+  $('accountBtn').setAttribute('aria-expanded', String(willOpen));
+  $('accountEmail').textContent = currentUser?.email || 'Account personale';
+});
+$('accountLogoutBtn').addEventListener('click', async () => {
+  $('accountMenu').classList.add('hidden');
+  await supabase.auth.signOut(); currentUser = null; showAuth();
+});
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.account-area')) { $('accountMenu').classList.add('hidden'); $('accountBtn').setAttribute('aria-expanded','false'); }
+});
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { $('accountMenu').classList.add('hidden'); $('accountBtn').setAttribute('aria-expanded','false'); } });
 supabase.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user ?? null;
   if (currentUser) { showDashboard(); setTimeout(loadDashboardData, 0); } else showAuth();
@@ -170,7 +184,7 @@ function showToolPage(nav='home') {
   $('dashboardView').classList.add('hidden');
   $('toolDialog').classList.remove('hidden');
   $('bottomNav').classList.remove('hidden');
-  $('logoutBtn').classList.remove('hidden');
+  $('accountBtn').classList.remove('hidden'); $('accountEmail').textContent = currentUser?.email || 'Account personale';
   document.querySelectorAll('#bottomNav [data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav === nav));
   window.scrollTo({top:0,left:0,behavior:'auto'});
 }
@@ -208,7 +222,7 @@ let workoutTimerRemaining = 0;
 function openWorkoutChooser(){
   if(!plans.length){openPlanDialog();return;}
   toolBackAction=()=>showDashboard();
-  openTool('Allenamento', `<div class="workout-intro"><p class="eyebrow">SESSIONE GUIDATA</p><h2>Quale scheda alleni oggi?</h2><p>Scegli una scheda per iniziare. Potrai registrare carichi e ripetizioni per ogni serie e usare il recupero integrato.</p></div><div class="plans-grid workout-plan-grid">${plans.map(p=>`<article class="plan-card"><div class="plan-card-icon">▶</div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'Scheda personale')}</p><button class="primary-button compact" type="button" data-start-plan="${p.id}">Inizia sessione →</button></article>`).join('')}</div>`);
+  openTool('Allenamento', `<div class="workout-intro"><p class="eyebrow">SESSIONE GUIDATA</p><h2>Quale scheda alleni oggi?</h2><p>Scegli una scheda per iniziare. Potrai registrare carichi e ripetizioni per ogni serie e usare il recupero integrato.</p></div><div class="plans-grid workout-plan-grid">${plans.map(p=>`<article class="plan-card"><div class="plan-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"></path><path d="M9 5v14"></path></svg></div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'Scheda personale')}</p><button class="primary-button compact" type="button" data-start-plan="${p.id}">Inizia sessione →</button></article>`).join('')}</div>`);
   $('toolContent').querySelectorAll('[data-start-plan]').forEach(b=>b.addEventListener('click',()=>startGuidedWorkout(plans.find(p=>p.id===b.dataset.startPlan))));
 }
 async function startGuidedWorkout(plan){
@@ -566,7 +580,7 @@ function openPlansView() {
   $('toolContent').querySelectorAll('[data-open-plan]').forEach(btn=>btn.addEventListener('click',()=>openPlanDetails(plans.find(p=>p.id===btn.dataset.openPlan))));
 }
 function openProfileView() {
-  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=11" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="text-button" type="button">Esci dal tuo account</button></div>`);
+  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=14" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><div class="profile-account-line"><span class="profile-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span><span><small>Account collegato</small><strong>${escapeHtml(currentUser?.email || '—')}</strong></span></div><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="secondary-button profile-logout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Logout</button></div>`);
   $('profileMeasures')?.addEventListener('click',()=>openTool('Peso e misure'));
   $('profileCalendar')?.addEventListener('click',()=>openTool('Calendario'));
   $('profileLogout')?.addEventListener('click',async()=>{await supabase.auth.signOut();currentUser=null;showAuth();});
