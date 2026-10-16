@@ -1,6 +1,6 @@
-const CACHE = 'marchesano-gym-v17-movement-lab';
+const CACHE = 'marchesano-gym-v18-esercizi-fondamentali';
 const CORE = [
-  './', './index.html', './styles.css?v=21', './app.js?v=21', './manifest.webmanifest?v=21',
+  './', './index.html', './styles.css?v=21', './app.js?v=22', './manifest.webmanifest?v=21',
   './apple-touch-icon.png', './icon-192.png?v=21', './icon-512.png?v=21',
   './logo-mark.png', './marchesano-gym-logo.png'
 ];
