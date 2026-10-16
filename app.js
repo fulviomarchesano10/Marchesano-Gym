@@ -349,12 +349,12 @@ function openExerciseLibrary(plan = null) {
   toolBackAction = () => plan ? openPlanDetails(plan) : showDashboard();
   $('toolTitle').textContent = plan ? 'Aggiungi esercizi alla scheda' : 'Libreria esercizi';
   $('toolContent').innerHTML = `
-    <div class="page-intro"><p>${plan ? `Scegli gli esercizi da inserire in <strong>${escapeHtml(plan.name)}</strong>.` : 'Catalogo in italiano: cerca per nome, gruppo muscolare o attrezzatura. Apri la scheda per vedere l’immagine originale, i muscoli coinvolti e come eseguire il movimento.'}</p><span class="catalog-count">${EXERCISE_CATALOG.length}+ esercizi nel catalogo integrato</span></div>
+    <div class="page-intro compact-catalog-intro"><p>${plan ? `Scegli gli esercizi da inserire in <strong>${escapeHtml(plan.name)}</strong>.` : 'Cerca gli esercizi per nome, muscolo o attrezzatura. Tocca una riga per aprire la guida completa.'}</p><span class="catalog-count" id="catalogCount">${EXERCISE_CATALOG.length} esercizi disponibili</span></div>
     <div class="exercise-toolbar"><input id="catalogSearch" type="search" placeholder="Cerca in italiano: panca, pressa, curl…" aria-label="Cerca esercizi"><select id="catalogMuscle" aria-label="Filtra per gruppo muscolare"><option value="">Tutti i gruppi muscolari</option>${[...new Set(EXERCISE_CATALOG.map(x=>x.muscle_group))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('')}</select><select id="catalogEquipment" aria-label="Filtra per attrezzatura"><option value="">Tutta l'attrezzatura</option>${[...new Set(EXERCISE_CATALOG.map(x=>x.equipment))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('')}</select></div>
-    <div class="exercise-actions"><button id="showMyExercises" class="secondary-button" type="button">I miei esercizi salvati</button><button id="loadOnlineCatalog" class="secondary-button" type="button">Cerca anche online ↗</button><button id="toggleCustomExercise" class="secondary-button" type="button">＋ Esercizio personalizzato</button></div>
+    <div class="exercise-actions compact-catalog-actions"><button id="showMyExercises" class="secondary-button" type="button">I miei esercizi</button><button id="toggleCustomExercise" class="secondary-button" type="button">＋ Personalizzato</button><button id="loadOnlineCatalog" class="secondary-button" type="button">↻ Aggiorna catalogo</button></div>
     <form id="exerciseForm" class="panel form-panel hidden"><h3>Nuovo esercizio personale</h3><label>Nome esercizio<input id="exerciseName" required placeholder="Es. Panca piana bilanciere"></label><label>Gruppo muscolare<select id="exerciseMuscle">${[...new Set(EXERCISE_CATALOG.map(x=>x.muscle_group))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('')}<option>Altro</option></select></label><label>Attrezzatura<input id="exerciseEquipment" placeholder="Bilanciere, manubri, cavi…"></label><label>Istruzioni<textarea id="exerciseInstructions" rows="3" placeholder="Descrizione e consigli di esecuzione"></textarea></label><button class="primary-button" type="submit">Salva esercizio <span>→</span></button><p id="exerciseMessage" class="status-message"></p></form>
     <p id="catalogMessage" class="status-message" role="status"></p><div id="exerciseList" class="exercise-library-list"></div><button id="catalogLoadMore" class="secondary-button load-more-button" type="button">Mostra altri esercizi</button>
-    <p class="catalog-credit">Il catalogo base è integrato nell’app. Il catalogo online usa <a href="https://wger.de" target="_blank" rel="noreferrer">wger</a>; immagini e descrizioni sono mostrate quando disponibili. Sono mostrati solo esercizi con nome italiano disponibile. Le immagini sono quelle associate all’esercizio nella fonte; quando mancano, non viene mostrata una figura generica sbagliata.</p>`;
+    <p class="catalog-credit">Catalogo integrato con dati pubblici di Free Exercise DB Italian. Le immagini vengono mostrate solo quando associate all’esercizio. <a href="https://github.com/Conte49/free-exercise-db-italian" target="_blank" rel="noreferrer">Fonte e licenza</a>.</p>`;
   $('catalogSearch').addEventListener('input', () => {catalogLimit=40; renderExerciseCatalog();});
   $('catalogMuscle').addEventListener('change', () => {catalogLimit=40; renderExerciseCatalog();});
   $('catalogEquipment').addEventListener('change', () => {catalogLimit=40; renderExerciseCatalog();});
@@ -373,23 +373,28 @@ function renderExerciseCatalog() {
   const muscle = $('catalogMuscle')?.value || '';
   const equipment = $('catalogEquipment')?.value || '';
   const rows = EXERCISE_CATALOG.filter(x => (!muscle || x.muscle_group === muscle) && (!equipment || x.equipment === equipment) && (!q || `${x.name} ${x.muscle_group} ${x.equipment} ${x.instructions||''}`.toLocaleLowerCase('it').includes(q)));
-  if (!rows.length) { list.innerHTML = '<div class="empty-state"><h3>Nessun esercizio trovato</h3><p>Prova un termine diverso oppure usa la ricerca online.</p></div>'; $('catalogLoadMore').classList.add('hidden'); return; }
+  const count = $('catalogCount'); if (count) count.textContent = `${rows.length} ${rows.length===1?'esercizio disponibile':'esercizi disponibili'}`;
+  if (!rows.length) { list.innerHTML = '<div class="empty-state"><h3>Nessun esercizio trovato</h3><p>Prova un termine diverso oppure modifica i filtri.</p></div>'; $('catalogLoadMore').classList.add('hidden'); return; }
   const shown = rows.slice(0,catalogLimit);
   list.innerHTML = shown.map((x) => {
     const idx = EXERCISE_CATALOG.indexOf(x); const icon = MUSCLE_ICONS[x.muscle_group] || MUSCLE_ICONS.Altro;
-    const description = exerciseGuide(x); const muscleDesc = MUSCLE_DESCRIPTIONS[x.muscle_group] || 'Muscoli coinvolti secondo la variante e la tecnica utilizzata.';
     const visual = exerciseVisual(x);
-    return `<article class="exercise-card exercise-library-card"><div class="exercise-visual">${visual}</div><div class="exercise-card-content"><div class="exercise-card-title"><div><h3>${escapeHtml(x.name)}</h3><p>${icon} ${escapeHtml(x.muscle_group || 'Altro')} <span>·</span> ${escapeHtml(x.equipment || 'Attrezzatura varia')}</p></div></div><button class="exercise-open-detail" type="button" data-open-exercise="${idx}">Apri scheda esercizio ↗</button><details class="exercise-details"><summary>Muscoli e istruzioni</summary><div class="exercise-description"><strong>Muscoli coinvolti</strong><p>${escapeHtml(muscleDesc)}</p><strong>Come eseguirlo</strong><p>${escapeHtml(description)}</p>${x.source === 'wger' ? '<small>Fonte: wger · immagine/descrizione di origine pubblica quando disponibile.</small>' : ''}</div></details><button class="exercise-add-button full-add" type="button" data-catalog-index="${idx}">${activePlanForExercise ? '＋ Aggiungi alla scheda' : '＋ Aggiungi a una scheda'}</button></div></article>`;
+    return `<article class="exercise-row" data-open-row="${idx}" tabindex="0" role="button" aria-label="Apri ${escapeHtml(x.name)}"><div class="exercise-row-thumb">${visual}</div><div class="exercise-row-main"><h3>${escapeHtml(x.name)}</h3><p>${icon} ${escapeHtml(x.muscle_group || 'Altro')} <span>·</span> ${escapeHtml(x.equipment || 'Attrezzatura varia')}</p></div><button class="exercise-row-add" type="button" data-catalog-index="${idx}" aria-label="${activePlanForExercise ? 'Aggiungi alla scheda' : 'Aggiungi a una scheda'}: ${escapeHtml(x.name)}">＋</button></article>`;
   }).join('');
   $('catalogLoadMore').classList.toggle('hidden', rows.length <= catalogLimit);
-  list.querySelectorAll('[data-catalog-index]').forEach(btn => btn.addEventListener('click', async () => {
-    const item = EXERCISE_CATALOG[Number(btn.dataset.catalogIndex)];
+  list.querySelectorAll('[data-open-row]').forEach(row=>{
+    const open=()=>openExerciseDetail(EXERCISE_CATALOG[Number(row.dataset.openRow)]);
+    row.addEventListener('click',e=>{if(e.target.closest('[data-catalog-index]'))return;open();});
+    row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+  });
+  list.querySelectorAll('[data-catalog-index]').forEach(btn => btn.addEventListener('click', async (e) => {
+    e.stopPropagation(); const item = EXERCISE_CATALOG[Number(btn.dataset.catalogIndex)];
     if (!activePlanForExercise) { openPlanPickerForExercise(item); return; }
-    btn.disabled = true; btn.textContent = 'Aggiunta…';
+    btn.disabled = true; btn.textContent = '…';
     try { const saved = await ensureUserExercise(item); await addExerciseToPlan(activePlanForExercise, saved); message('catalogMessage', `${item.name} aggiunto alla scheda.`); await loadPlanExercises(activePlanForExercise); }
     catch (err) { message('catalogMessage', err.message || 'Impossibile aggiungere l’esercizio.', true); }
-    finally { btn.disabled = false; btn.textContent = '＋ Aggiungi alla scheda'; }
-  }));  list.querySelectorAll('[data-open-exercise]').forEach(btn=>btn.addEventListener('click',()=>openExerciseDetail(EXERCISE_CATALOG[Number(btn.dataset.openExercise)])));
+    finally { btn.disabled = false; btn.textContent = '＋'; }
+  }));
 }
 function openExerciseDetail(item){
   if(!item)return;
@@ -416,47 +421,49 @@ function openPlanPickerForExercise(item) {
 async function loadOnlineExerciseCatalog(silent=false) {
   const button = $('loadOnlineCatalog'); const status = $('catalogMessage');
   if (onlineCatalogLoading) return;
-  onlineCatalogLoading = true; if (button) {button.disabled=true;button.textContent='Ricerca online…';}
-  if (!silent && status) message('catalogMessage','Sto consultando il catalogo pubblico wger…');
+  onlineCatalogLoading = true; if (button) {button.disabled=true;button.textContent='Caricamento…';}
+  if (!silent && status) message('catalogMessage','Carico il catalogo italiano con immagini specifiche per esercizio…');
+  const stripHtml = s => String(s||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+  const muscleMap = {chest:'Petto',back:'Schiena',shoulders:'Spalle',biceps:'Bicipiti',triceps:'Tricipiti',forearms:'Avambracci',quadriceps:'Quadricipiti',hamstrings:'Femorali',glutes:'Glutei',calves:'Polpacci',abdominals:'Addome',abductors:'Abduttori',adductors:'Adduttori',traps:'Trapezi','middle back':'Schiena',middle_back:'Schiena','lower back':'Lombari',lower_back:'Lombari',lats:'Dorsali',neck:'Collo'};
+  const equipmentMap = {barbell:'Bilanciere',dumbbell:'Manubri',body_only:'Corpo libero',bodyweight:'Corpo libero',cable:'Cavi',machine:'Macchina',bands:'Elastico',kettlebells:'Kettlebell',kettlebell:'Kettlebell',foam_roll:'Rullo massaggiante',medicine_ball:'Palla medica',exercise_ball:'Fitball',e_z_curl_bar:'Bilanciere EZ',other:'Attrezzatura varia',none:'Corpo libero'};
   try {
-    let url='https://wger.de/api/v2/exerciseinfo/?format=json&language__code=it&limit=100&offset=0'; let loaded=0; let added=0; let pages=0;
-    const seen = new Set(EXERCISE_CATALOG.map(x=>x.name.toLocaleLowerCase('it')));
-    while (url && pages < 30) {
-      const response=await fetch(url,{headers:{Accept:'application/json'}}); if(!response.ok) throw new Error(`Catalogo online non disponibile (${response.status}).`);
-      const page=await response.json(); const results=Array.isArray(page.results)?page.results:[]; if(!results.length) break;
-      for(const entry of results){
-        const translations=Array.isArray(entry.translations)?entry.translations:[];
-        const lang=t=>String(t?.language?.short_name || t?.language?.shortName || t?.language?.short || '').toLowerCase();
-        const italian=translations.find(t=>lang(t)==='it' || t.language===12 || t.language?.id===12 || t.language?.short_name?.toLowerCase()==='it');
-        const mappedTranslation=translations.find(t=>t.name && EXERCISE_NAME_IT[String(t.name).trim().toLocaleLowerCase('it')]);
-        // Preferisce l'italiano; usa una traduzione controllata solo per nomi inglesi/francesi già mappati.
-        const tr=italian || mappedTranslation || {};
-        let name=String(tr.name||'').trim(); if(!name) continue;
-        name=localizeExerciseName(name);
-        const categoryRaw=typeof entry.category==='object' ? (entry.category?.name||'') : '';
-        const rawCat=String(categoryRaw).toLowerCase();
-        const categoryMap={chest:'Petto',back:'Schiena',shoulders:'Spalle',arms:'Bicipiti',legs:'Gambe',abs:'Addome',cardio:'Cardio',glutes:'Glutei',calves:'Polpacci',forearms:'Avambracci'};
-        const group=categoryMap[rawCat] || (['Petto','Schiena','Spalle','Bicipiti','Tricipiti','Gambe','Glutei','Polpacci','Addome','Cardio','Avambracci'].includes(categoryRaw)?categoryRaw:'Altro');
-        const equipRaw=Array.isArray(entry.equipment)?entry.equipment.map(e=>typeof e==='object'?e.name:'').filter(Boolean).join(', '):''; const equip=localizeEquipment(equipRaw);
-        const stripHtml=s=>String(s||'').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
-        const imageRaw=Array.isArray(entry.images) ? (entry.images.find(im=>im.is_main)?.image || entry.images[0]?.image || null) : null; const image=imageRaw ? new URL(imageRaw,'https://wger.de').href : null;
-        const item={name,muscle_group:group,equipment:equip||'Attrezzatura varia',instructions:stripHtml(tr.description)||'',image,source:'wger'};
-        const key=name.toLocaleLowerCase('it');
-        const existingIndex=EXERCISE_CATALOG.findIndex(x=>x.name.toLocaleLowerCase('it')===key);
-        if(existingIndex>=0){ if(item.image && !EXERCISE_CATALOG[existingIndex].image) EXERCISE_CATALOG[existingIndex].image=item.image; if(item.instructions && (!EXERCISE_CATALOG[existingIndex].instructions || EXERCISE_CATALOG[existingIndex].instructions.length<60)) EXERCISE_CATALOG[existingIndex].instructions=item.instructions; }
-        else if(!seen.has(key)){EXERCISE_CATALOG.push(item);seen.add(key);added++;}
-      }
-      loaded+=results.length; pages++; url=page.next ? new URL(page.next,'https://wger.de').href : null; if(url){const nextUrl=new URL(url);nextUrl.searchParams.set('language__code','it');url=nextUrl.href;}
+    const url='https://raw.githubusercontent.com/Conte49/free-exercise-db-italian/main/dist/exercises-it.json';
+    const response=await fetch(url,{headers:{Accept:'application/json'}});
+    if(!response.ok) throw new Error(`Dataset italiano non disponibile (${response.status})`);
+    const payload=await response.json();
+    const sourceRows=Array.isArray(payload)?payload:(Array.isArray(payload.exercises)?payload.exercises:[]);
+    if(!sourceRows.length) throw new Error('Il dataset non contiene esercizi leggibili.');
+    const merged=new Map(EXERCISE_CATALOG.map(x=>[x.name.toLocaleLowerCase('it'),x]));
+    let imported=0, withImages=0;
+    for(const row of sourceRows){
+      const name=String(row.name_it||row.nameIt||row.name||'').trim(); if(!name) continue;
+      const muscles=[...(Array.isArray(row.primaryMuscles)?row.primaryMuscles:[]),...(Array.isArray(row.secondaryMuscles)?row.secondaryMuscles:[])].map(m=>muscleMap[String(m).toLowerCase()]||String(m).replace(/_/g,' ')).filter(Boolean);
+      let group=muscles.length?muscles[0]:'Altro';
+      const muscleAliases={Addominali:'Addome',abdominals:'Addome',chest:'Petto',back:'Schiena',shoulders:'Spalle',biceps:'Bicipiti',triceps:'Tricipiti',quadriceps:'Quadricipiti',hamstrings:'Femorali',glutes:'Glutei',calves:'Polpacci'};
+      group=muscleAliases[group]||group; if(!['Petto','Schiena','Spalle','Bicipiti','Tricipiti','Avambracci','Quadricipiti','Femorali','Gambe','Glutei','Polpacci','Addome','Abduttori','Adduttori','Trapezi','Lombari','Cardio'].includes(group)) group='Altro';
+      const rawEquipment=String(row.equipment||'').toLowerCase().replace(/\s+/g,'_');
+      const equipment=equipmentMap[rawEquipment]||localizeEquipment(String(row.equipment||'Attrezzatura varia'))||'Attrezzatura varia';
+      const instructions=Array.isArray(row.instructions_it)?row.instructions_it.join(' '):Array.isArray(row.instructions)?row.instructions.join(' '):String(row.instructions_it||row.instructions||'');
+      const paths=Array.isArray(row.images)?row.images:[];
+      const first=paths[0];
+      let image=null;
+      if(typeof first==='string'&&first){ image=first.startsWith('http')?first:`https://raw.githubusercontent.com/Conte49/free-exercise-db-italian/main/exercises/${first.replace(/^\/+/, '')}`; }
+      const item={name:localizeExerciseName(name),muscle_group:group,equipment,instructions:stripHtml(instructions),image,source:'free-exercise-db-italian',source_id:row.id||null,primary_muscles:row.primaryMuscles||[],secondary_muscles:row.secondaryMuscles||[]};
+      const key=item.name.toLocaleLowerCase('it'); const existing=merged.get(key);
+      if(existing){ if(image&&!existing.image)existing.image=image; if(item.instructions&&(!existing.instructions||existing.instructions.length<30))existing.instructions=item.instructions; if(existing.muscle_group==='Altro'&&group!=='Altro')existing.muscle_group=group; if((!existing.equipment||existing.equipment==='Attrezzatura varia')&&equipment)existing.equipment=equipment; }
+      else {merged.set(key,item);imported++;}
+      if(image)withImages++;
     }
-    EXERCISE_CATALOG.sort((a,b)=>a.name.localeCompare(b.name,'it'));
+    EXERCISE_CATALOG.splice(0,EXERCISE_CATALOG.length,...[...merged.values()].sort((a,b)=>a.name.localeCompare(b.name,'it')));
     onlineCatalogLoaded=true;
-    const muscleSelect=$('catalogMuscle'); if(muscleSelect){const selected=muscleSelect.value; muscleSelect.innerHTML='<option value="">Tutti i gruppi muscolari</option>'+[...new Set(EXERCISE_CATALOG.map(x=>x.muscle_group))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('');muscleSelect.value=selected;}
+    const muscleSelect=$('catalogMuscle'); if(muscleSelect){const selected=muscleSelect.value;muscleSelect.innerHTML='<option value="">Tutti i gruppi muscolari</option>'+[...new Set(EXERCISE_CATALOG.map(x=>x.muscle_group))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('');muscleSelect.value=selected;}
     const equipSelect=$('catalogEquipment'); if(equipSelect){const selected=equipSelect.value;equipSelect.innerHTML='<option value="">Tutta l’attrezzatura</option>'+[...new Set(EXERCISE_CATALOG.map(x=>x.equipment))].sort().map(x=>`<option>${escapeHtml(x)}</option>`).join('');equipSelect.value=selected;}
-    renderExerciseCatalog(); if(status) message('catalogMessage',`Catalogo italiano aggiornato: ${loaded} voci consultate, ${added} nuove varianti in italiano. Le aggiungi alle schede solo quando le scegli.`);
-  } catch(err) { if(status) message('catalogMessage',silent ? 'Catalogo online non raggiungibile in questo momento: il catalogo integrato resta disponibile.' : `${err.message||'Ricerca online non riuscita.'} Il catalogo integrato resta disponibile.`, true); }
-  finally {onlineCatalogLoading=false;if(button){button.disabled=false;button.textContent='Cerca anche online ↗';}}
+    renderExerciseCatalog(); if(status) message('catalogMessage',`Catalogo aggiornato: ${EXERCISE_CATALOG.length} esercizi disponibili. ${withImages} voci con immagine associata; ${imported} esercizi aggiunti al catalogo.`);
+  } catch(err) {
+    if(status) message('catalogMessage',`Non riesco a caricare il nuovo catalogo in questo momento. Il catalogo già integrato resta disponibile. (${err.message||'Errore di rete'})`,true);
+  }
+  finally {onlineCatalogLoading=false;if(button){button.disabled=false;button.textContent='↻ Aggiorna catalogo';}}
 }
-
 async function ensureUserExercise(item) {
   if (!currentUser) throw new Error('Accedi per salvare gli esercizi.');
   const { data: existing, error: findError } = await supabase.from('exercises').select('*').eq('user_id', currentUser.id).eq('name', item.name).limit(1);
