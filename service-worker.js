@@ -1,7 +1,7 @@
-const CACHE = 'marchesano-gym-v15-library-rebuild';
+const CACHE = 'marchesano-gym-v16-movement-lab';
 const CORE = [
-  './', './index.html', './styles.css?v=19', './app.js?v=19', './manifest.webmanifest?v=19',
-  './apple-touch-icon.png', './icon-192.png?v=19', './icon-512.png?v=19',
+  './', './index.html', './styles.css?v=20', './app.js?v=20', './manifest.webmanifest?v=20',
+  './apple-touch-icon.png', './icon-192.png?v=20', './icon-512.png?v=20',
   './logo-mark.png', './marchesano-gym-logo.png'
 ];
 self.addEventListener('install', event => {
