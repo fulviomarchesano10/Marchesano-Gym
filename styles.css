@@ -46,3 +46,25 @@ input,textarea,select{font-size:16px!important}button,input,textarea,select{touc
 @media(min-width:761px){.dashboard-home{max-width:850px;margin:0 auto}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.welcome-row{padding-top:38px}.mini-stats{margin:18px 0 24px}.quick-card{min-height:86px}.bottom-nav{gap:clamp(8px,4vw,48px)}}
 
 .profile-panel{text-align:center;padding:8px 0 2px}.profile-mark{width:84px;height:84px;margin:0 auto 14px;border-radius:22px;overflow:hidden;border:1px solid #ff303855;background:#080809}.profile-mark img{width:100%;height:100%;object-fit:cover}.profile-panel h3{font-family:'Space Grotesk';font-size:22px;margin:0 0 6px}.profile-panel .muted{font-size:13px;line-height:1.6;margin:0 auto 20px;max-width:300px}.profile-secondary{width:100%;margin-top:10px}.modal-plans{grid-template-columns:1fr}.modal-plans .plan-card{padding:16px}
+
+
+/* Marchesano Gym exercise library */
+.exercise-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.exercise-toolbar input{grid-column:1/-1}
+.exercise-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
+.exercise-actions .secondary-button{flex:1 1 180px;min-height:44px}
+.exercise-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line,#303139);border-radius:16px;background:rgba(255,255,255,.025);margin:9px 0}
+.exercise-card>div{min-width:0;flex:1}
+.exercise-card strong{display:block;line-height:1.3}
+.exercise-card p{margin:5px 0 0;color:var(--muted,#9b9ca5);font-size:.88rem}
+.exercise-card small{display:block;color:var(--muted,#9b9ca5);margin-top:7px;font-size:.82rem}
+.exercise-add-button,.remove-exercise-button{border:1px solid rgba(255,48,56,.35);background:rgba(255,48,56,.10);color:var(--text,#f5f5f6);border-radius:11px;padding:9px 11px;font:inherit;font-size:.82rem;max-width:48%;flex-shrink:0}
+.exercise-add-button:disabled{opacity:.55}
+.remove-exercise-button{font-size:1.35rem;min-width:38px;max-width:none;color:#ff6569}
+.catalog-credit{color:var(--muted,#9b9ca5);font-size:.76rem;line-height:1.5;margin-top:18px}
+.plan-exercises{margin:14px 0}
+.plan-exercise-card{align-items:flex-start}
+.empty-state{padding:18px;border:1px dashed var(--line,#303139);border-radius:16px;margin:12px 0}
+.empty-state h3{margin:0 0 7px}
+.empty-state p{margin:0;color:var(--muted,#9b9ca5);line-height:1.5}
+@media(max-width:420px){.exercise-toolbar{grid-template-columns:1fr}.exercise-toolbar input{grid-column:auto}.exercise-card{padding:11px}.exercise-add-button{max-width:52%;font-size:.76rem;padding:8px}}
