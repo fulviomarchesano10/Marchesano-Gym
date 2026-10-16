@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://dkghztezhnheblmfkvzn.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_bdpy-S_n7vltkHvmA6H9BA_EPB-nuqU';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZ2h6dGV6aG5oZWJsbWZrdnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxMzg3MDcsImV4cCI6MjEwNzcxNDcwN30.HYUi_VMGOe8oSUy02VOWqeeYsOuiyAZmhavFqQUJ-c0';
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const $ = (id) => document.getElementById(id);
