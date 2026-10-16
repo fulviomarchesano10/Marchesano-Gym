@@ -68,3 +68,30 @@ input,textarea,select{font-size:16px!important}button,input,textarea,select{touc
 .empty-state h3{margin:0 0 7px}
 .empty-state p{margin:0;color:var(--muted,#9b9ca5);line-height:1.5}
 @media(max-width:420px){.exercise-toolbar{grid-template-columns:1fr}.exercise-toolbar input{grid-column:auto}.exercise-card{padding:11px}.exercise-add-button{max-width:52%;font-size:.76rem;padding:8px}}
+
+
+/* Marchesano Gym v5: real full-page navigation, no modal dropdowns for sections. */
+.page-view{display:block;min-height:calc(100vh - 190px);padding:24px 0 34px;animation:pageIn .18s ease-out}
+.page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:8px 0 24px;padding-bottom:18px;border-bottom:1px solid #ffffff12}
+.page-heading h1{font-family:'Space Grotesk';font-size:clamp(28px,6vw,42px);letter-spacing:-1.5px;line-height:1.05;margin:0}
+.back-button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px;white-space:nowrap}
+.page-intro{border:1px solid #ff303827;background:linear-gradient(120deg,#ff30380b,#17191d);border-radius:16px;padding:16px 18px;margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.55}
+.page-intro p{margin:0}.catalog-count{display:inline-block;color:#ff646a;font-size:12px;font-weight:700;margin-top:10px}
+.page-section-heading{margin:26px 0 14px;align-items:center}.page-section-heading h2,.subsection-title{font-family:'Space Grotesk';font-size:22px;margin:0}
+.page-section-heading .primary-button{font-size:13px;white-space:nowrap;padding:12px 13px}
+.page-profile{max-width:500px;margin:18px auto}.form-panel{box-shadow:none;margin:16px 0 24px}.form-panel h3{margin:0 0 10px;font-family:'Space Grotesk'}
+.pill{display:inline-flex;border:1px solid #ff303844;color:#ff696f;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:700;margin-top:10px}
+.exercise-library-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.exercise-library-card{display:flex;flex-direction:column;align-items:stretch;gap:0;margin:0;padding:0;overflow:hidden;background:linear-gradient(150deg,#1a1c21,#131418);border-radius:18px}
+.exercise-visual{position:relative;height:132px;background:radial-gradient(circle at 50% 30%,#392025,#15161a 70%);border-bottom:1px solid #ffffff0c;overflow:hidden}
+.exercise-photo{width:100%;height:100%;object-fit:cover;display:block;background:#17191d}
+.exercise-art{width:100%;height:100%;display:grid;place-content:center;justify-items:center;gap:5px;color:#ff6269;background:radial-gradient(circle at center,#3a171e,#17191d 72%)}
+.exercise-art span{font-size:42px;line-height:1}.exercise-art small{font-size:9px;letter-spacing:1.5px;color:#c2a5a8;font-weight:700}.small-art{width:78px;height:78px;flex:0 0 78px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}.small-art span{font-size:28px}
+.exercise-card-content{padding:14px;min-width:0}.exercise-card-title h3,.exercise-card-content h3{font-family:'Space Grotesk';font-size:16px;line-height:1.25;margin:0 0 7px}.exercise-card-title p,.exercise-card-content>p{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.4}.exercise-details{border-top:1px solid #ffffff12;padding-top:9px;margin-top:7px}.exercise-details summary{color:#ff777c;font-size:12px;font-weight:700;cursor:pointer;list-style:none}.exercise-details summary::-webkit-details-marker{display:none}.exercise-details summary:after{content:'＋';float:right}.exercise-details[open] summary:after{content:'−'}.exercise-description{font-size:12px;line-height:1.55;color:var(--muted);padding:8px 0 2px}.exercise-description strong{display:block;color:#eee;font-size:11px;margin:8px 0 3px}.exercise-description p{margin:0 0 8px}.exercise-description small{font-size:10px;color:#ff777c}
+.full-add{max-width:none;width:100%;margin-top:12px;padding:10px 12px;text-align:center;font-size:12px}
+.exercise-toolbar{position:sticky;top:0;z-index:2;background:#0d0e11f2;padding:8px 0 10px;margin:8px 0;backdrop-filter:blur(12px)}.exercise-actions{margin:8px 0 14px}.exercise-actions .secondary-button{font-size:12px;padding:11px 12px}
+.load-more-button{width:100%;margin:18px 0}.catalog-credit a{color:#ff777c}.my-exercises-heading{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px}.my-exercises-heading h2{font-family:'Space Grotesk';margin:0;font-size:20px}.my-exercises-heading .secondary-button{font-size:12px}
+.plan-card-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#ff30381a;color:var(--accent);font-size:22px;margin-bottom:14px}
+@keyframes pageIn{from{opacity:.75;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:520px){.app-shell{padding:0 14px}.page-view{padding-top:18px}.page-heading{align-items:flex-start;flex-direction:column;margin-bottom:18px}.back-button{align-self:flex-start}.exercise-library-list{grid-template-columns:1fr}.exercise-library-card{display:grid;grid-template-columns:100px minmax(0,1fr);align-items:stretch}.exercise-visual{height:100%;min-height:155px;border-bottom:0;border-right:1px solid #ffffff0c}.exercise-card-content{padding:12px}.exercise-card-content h3{font-size:14px}.exercise-art span{font-size:33px}.exercise-art small{font-size:8px}.exercise-details{margin-top:4px}.exercise-description{font-size:11px}.full-add{font-size:11px;padding:9px 7px}.exercise-actions .secondary-button{flex:1 1 40%}.page-section-heading{align-items:flex-start;flex-direction:column}.page-section-heading .primary-button{width:100%}.page-intro{font-size:13px;padding:14px}.bottom-nav{gap:0;padding:6px 3px max(6px,env(safe-area-inset-bottom))}.bottom-nav button{font-size:8px;min-width:0;letter-spacing:-.15px}.bottom-nav button span{font-size:17px}.brand-logo{width:50px;height:50px;flex-basis:50px}}
+@media(min-width:521px) and (max-width:900px){.exercise-library-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
