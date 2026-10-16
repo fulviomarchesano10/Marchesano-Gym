@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="./icons/logo-mark.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png?v=4">
   <meta name="theme-color" content="#101114">
   <meta name="description" content="Marchesano Gym — il tuo sistema personale di allenamento.">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest?v=4">
+  <link rel="icon" href="./icons/icon-192.png?v=4" type="image/png">
   <link rel="stylesheet" href="./styles.css">
   <title>Marchesano Gym</title>
 </head>
@@ -17,7 +17,7 @@
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="./" aria-label="Marchesano Gym home">
-        <img class="brand-logo" src="./icons/logo-mark.png" alt="Logo Marchesano Gym">
+        <img class="brand-logo" src="./icons/logo-mark.png?v=4" alt="Logo Marchesano Gym">
         <span><strong>MARCHESANO <em>GYM</em></strong><small>YOUR PERSONAL TRAINING SYSTEM</small></span>
       </a>
       <button id="logoutBtn" class="icon-button hidden" aria-label="Esci" title="Esci">↗</button>
@@ -26,7 +26,7 @@
     <main>
       <section id="authView" class="auth-layout">
         <div class="hero-copy">
-          <img class="hero-logo" src="./assets/marchesano-gym-logo.png" alt="Marchesano Gym — logo rosso e nero">
+          <img class="hero-logo" src="./assets/marchesano-gym-logo.png?v=4" alt="Marchesano Gym — logo rosso e nero">
           <p class="eyebrow">DISCIPLINA. COSTANZA. PROGRESSI.</p>
           <h1>Costruisci<br>la tua <span>forza.</span></h1>
           <p class="muted">Le tue schede, i tuoi carichi e ogni allenamento, in un unico posto.</p>
@@ -45,27 +45,22 @@
         </form>
       </section>
 
-      <section id="dashboardView" class="hidden">
+      <section id="dashboardView" class="hidden dashboard-home">
         <div class="welcome-row">
-          <div><p class="eyebrow">IL TUO SPAZIO PERSONALE</p><h1>Pronto ad allenarti<span class="accent">.</span></h1><p id="todayLabel" class="muted"></p></div>
-          <button id="startWorkoutBtn" class="primary-button compact">＋ Nuovo allenamento</button>
+          <div class="welcome-copy"><p class="eyebrow">IL TUO SPAZIO PERSONALE</p><h1>Pronto ad allenarti<span class="accent">.</span></h1><p id="todayLabel" class="muted"></p></div>
         </div>
-        <div class="stats-grid">
-          <article class="stat-card"><span class="stat-icon">▦</span><p>Schede salvate</p><strong id="plansCount">0</strong><small>La tua programmazione</small></article>
-          <article class="stat-card"><span class="stat-icon">↗</span><p>Sessioni completate</p><strong id="sessionsCount">0</strong><small>Il lavoro fatto conta</small></article>
-          <article class="stat-card"><span class="stat-icon">⌁</span><p>Peso corporeo</p><strong id="bodyWeight">—</strong><small>Ultima misurazione</small></article>
-          <article class="stat-card accent-card"><span class="stat-icon">✦</span><p>Costanza</p><strong>Un giorno alla volta</strong><small>La prossima sessione parte da qui</small></article>
+        <button id="startWorkoutBtn" class="primary-button start-workout"><span class="start-icon">▶</span><span class="start-copy"><strong>Inizia allenamento</strong><small>Riprendi il controllo dei tuoi progressi</small></span><span class="start-arrow">→</span></button>
+        <div class="mini-stats">
+          <button class="mini-stat" data-nav="plans"><span class="mini-stat-icon">▦</span><strong id="plansCount">0</strong><small>Schede</small></button>
+          <button class="mini-stat" data-nav="history"><span class="mini-stat-icon">↗</span><strong id="sessionsCount">0</strong><small>Sessioni</small></button>
+          <button class="mini-stat" data-nav="profile"><span class="mini-stat-icon">⌁</span><strong id="bodyWeight">—</strong><small>Peso attuale</small></button>
         </div>
-        <div class="section-heading"><div><p class="eyebrow">PROGRAMMA</p><h2>Le tue schede</h2></div><button id="addPlanBtn" class="secondary-button">＋ Crea scheda</button></div>
-        <div id="plansList" class="plans-grid"></div>
-        <div id="emptyPlans" class="empty-state"><span class="empty-icon">＋</span><h3>La prima scheda inizia qui</h3><p>Crea una scheda personalizzata e organizza esercizi, serie, ripetizioni e recuperi.</p><button id="emptyAddPlanBtn" class="primary-button compact">Crea la prima scheda</button></div>
-
-        <div class="section-heading"><div><p class="eyebrow">STRUMENTI</p><h2>Il tuo percorso</h2></div></div>
-        <div class="tools-grid">
-          <button class="tool-card" data-tool="exercises"><span>▤</span><strong>Libreria esercizi</strong><small>Organizza i tuoi esercizi</small><b>→</b></button>
-          <button class="tool-card" data-tool="history"><span>◷</span><strong>Storico allenamenti</strong><small>Rivedi le sessioni svolte</small><b>→</b></button>
-          <button class="tool-card" data-tool="calendar"><span>▦</span><strong>Calendario</strong><small>Pianifica la settimana</small><b>→</b></button>
-          <button class="tool-card" data-tool="body"><span>⌁</span><strong>Peso e misure</strong><small>Registra i tuoi progressi</small><b>→</b></button>
+        <div class="quick-heading"><div><p class="eyebrow">ACCESSO RAPIDO</p><h2>Tutto il tuo allenamento</h2></div></div>
+        <div class="quick-grid">
+          <button class="quick-card" data-action="plans"><span class="quick-icon">▦</span><span><strong>Le mie schede</strong><small>Crea e consulta i programmi</small></span><b>→</b></button>
+          <button class="quick-card" data-action="exercises"><span class="quick-icon">▤</span><span><strong>Esercizi</strong><small>La tua libreria personale</small></span><b>→</b></button>
+          <button class="quick-card" data-action="history"><span class="quick-icon">◷</span><span><strong>Storico</strong><small>Le sessioni completate</small></span><b>→</b></button>
+          <button class="quick-card" data-action="profile"><span class="quick-icon">⌁</span><span><strong>Profilo e misure</strong><small>Peso e progressi fisici</small></span><b>→</b></button>
         </div>
         <p id="dashboardMessage" class="status-message" role="status"></p>
       </section>
@@ -73,9 +68,9 @@
     <nav id="bottomNav" class="bottom-nav hidden" aria-label="Navigazione">
       <button class="active" data-nav="home"><span>⌂</span>Home</button>
       <button data-nav="plans"><span>▦</span>Schede</button>
-      <button data-nav="exercises"><span>▤</span>Esercizi</button>
+      <button data-nav="workout"><span>▶</span>Allenamento</button>
       <button data-nav="history"><span>◷</span>Storico</button>
-      <button data-nav="body"><span>⌁</span>Progressi</button>
+      <button data-nav="profile"><span>●</span>Profilo</button>
     </nav>
   </div>
 

@@ -27,7 +27,7 @@ function showDashboard() {
   $('bottomNav').classList.remove('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('todayLabel').textContent = new Intl.DateTimeFormat('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(new Date());
-  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+  document.documentElement.style.scrollBehavior = 'auto'; requestAnimationFrame(() => { window.scrollTo(0,0); document.body.scrollTop = 0; });
 }
 function setAuthMode() {
   $('authTitle').textContent = isRegister ? 'Crea il tuo account' : 'Bentornato';
@@ -90,6 +90,7 @@ async function loadDashboardData() {
   renderPlans();
 }
 function renderPlans() {
+  if (!$('plansList') || !$('emptyPlans')) return;
   $('plansList').innerHTML = '';
   $('emptyPlans').classList.toggle('hidden', plans.length > 0);
   plans.forEach(plan => {
@@ -110,8 +111,8 @@ function openPlanDialog() {
   $('planForm').reset();
   $('planDialog').showModal();
 }
-$('addPlanBtn').addEventListener('click', openPlanDialog);
-$('emptyAddPlanBtn').addEventListener('click', openPlanDialog);
+$('addPlanBtn')?.addEventListener('click', openPlanDialog);
+$('emptyAddPlanBtn')?.addEventListener('click', openPlanDialog);
 $('startWorkoutBtn').addEventListener('click', () => {
   if (!plans.length) { openPlanDialog(); return; }
   openTool('Workout guidato', `<div class="notice">Il database è pronto per le schede. Nel prossimo passaggio collegheremo gli esercizi alle schede e costruiremo la schermata guidata con serie, carichi e timer di recupero.</div><div class="tool-list">${plans.map(p=>`<article><strong>${escapeHtml(p.name)}</strong><p>${escapeHtml(p.description || 'Scheda personale')}</p><button class="secondary-button" data-plan="${p.id}">Seleziona scheda</button></article>`).join('')}</div>`);
@@ -139,7 +140,7 @@ function openPlanDetails(plan) {
   $('toolTitle').textContent = plan.name;
   $('toolContent').innerHTML = `<p class="muted">${escapeHtml(plan.description || 'Nessuna descrizione inserita.')}</p><div class="notice">Questa è la prima versione della scheda. Nel prossimo passaggio aggiungeremo la gestione degli esercizi, delle serie, delle ripetizioni, dei chili e dei tempi di recupero.</div><div style="height:14px"></div><button id="planAddExercise" class="primary-button">Aggiungi esercizi <span>→</span></button>`;
   $('toolContent').querySelector('#planAddExercise').addEventListener('click', () => openTool('Libreria esercizi', `<div class="notice">La libreria sarà collegata alle schede nel prossimo passaggio. Puoi già creare esercizi dalla sezione Libreria esercizi.</div><div style="height:12px"></div><button class="primary-button" id="createExerciseFromPlan">＋ Crea esercizio</button>`));
-  $('toolDialog').showModal();
+  if (!$('toolDialog').open) $('toolDialog').showModal();
 }
 $('closeToolDialog').addEventListener('click', () => $('toolDialog').close());
 function escapeHtml(value='') { return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -167,7 +168,7 @@ function openTool(tool, customContent = null) {
       $('toolContent').innerHTML = '<div class="notice">Sezione in preparazione. Le funzioni verranno collegate progressivamente al database.</div>';
     }
   }
-  $('toolDialog').showModal();
+  if (!$('toolDialog').open) $('toolDialog').showModal();
 }
 async function loadExercises() {
   const { data, error } = await supabase.from('exercises').select('*').eq('user_id', currentUser.id).order('name');
@@ -213,13 +214,36 @@ async function saveMetric(e) {
   if (error) { message('metricMessage',error.message,true); return; }
   message('metricMessage','Misurazione salvata.'); await loadMetrics(); await loadDashboardData();
 }
+function openPlansView() {
+  const cards = plans.length ? plans.map(p => `<article class="plan-card" style="--plan-color:${escapeHtml(p.color || '#ff3038')}"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description || 'Scheda personale')}</p><div class="plan-meta"><span>SCHEDA PERSONALE</span><button type="button" data-open-plan="${p.id}">Apri →</button></div></article>`).join('') : '<div class="empty-state"><span class="empty-icon">＋</span><h3>Ancora nessuna scheda</h3><p>Crea la tua prima scheda e organizza il tuo allenamento.</p></div>';
+  openTool('Le mie schede', `<button id="addPlanFromList" class="primary-button" type="button">＋ Crea nuova scheda <span>→</span></button><div style="height:14px"></div><div class="plans-grid modal-plans">${cards}</div>`);
+  $('addPlanFromList')?.addEventListener('click', openPlanDialog);
+  $('toolContent').querySelectorAll('[data-open-plan]').forEach(btn => btn.addEventListener('click', () => openPlanDetails(plans.find(p => p.id === btn.dataset.openPlan))));
+}
+function openProfileView() {
+  openTool('Profilo', `<div class="profile-panel"><div class="profile-mark"><img src="./icons/logo-mark.png?v=3" alt="Marchesano Gym"></div><h3>Il tuo percorso</h3><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="text-button" type="button">Esci dal tuo account</button></div>`);
+  $('profileMeasures')?.addEventListener('click', () => openTool('Peso e misure'));
+  $('profileCalendar')?.addEventListener('click', () => openTool('Calendario'));
+  $('profileLogout')?.addEventListener('click', async () => { await supabase.auth.signOut(); currentUser = null; $('toolDialog').close(); showAuth(); });
+}
 document.querySelectorAll('[data-tool]').forEach(btn => btn.addEventListener('click', () => openTool(({exercises:'Libreria esercizi',history:'Storico allenamenti',calendar:'Calendario',body:'Peso e misure'})[btn.dataset.tool])));
+document.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', () => {
+  const action = btn.dataset.action;
+  if (action === 'plans') openPlansView();
+  else if (action === 'exercises') openTool('Libreria esercizi');
+  else if (action === 'history') openTool('Storico allenamenti');
+  else if (action === 'profile') openProfileView();
+}));
 document.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b===btn));
-  const navMap = {home:null,plans:null,exercises:'Libreria esercizi',history:'Storico allenamenti',body:'Peso e misure'};
-  if (btn.dataset.nav==='home') { $('toolDialog').close(); return; }
-  if (btn.dataset.nav==='plans') { $('toolDialog').close(); $('dashboardView').scrollIntoView({behavior:'smooth'}); $('plansList').scrollIntoView({behavior:'smooth',block:'center'}); return; }
-  if (navMap[btn.dataset.nav]) openTool(navMap[btn.dataset.nav]);
+  document.querySelectorAll('#bottomNav [data-nav]').forEach(b=>b.classList.toggle('active',b===btn));
+  const nav = btn.dataset.nav;
+  if (nav === 'home') { if ($('toolDialog').open) $('toolDialog').close(); window.scrollTo({top:0,behavior:'auto'}); return; }
+  if (nav === 'plans') { openPlansView(); return; }
+  if (nav === 'workout') { if ($('toolDialog').open) $('toolDialog').close(); $('startWorkoutBtn').click(); return; }
+  if (nav === 'exercises') { openTool('Libreria esercizi'); return; }
+  if (nav === 'history') { openTool('Storico allenamenti'); return; }
+  if (nav === 'profile') { openProfileView(); return; }
+  if (nav === 'body') openTool('Peso e misure');
 }));
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
