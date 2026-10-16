@@ -494,27 +494,29 @@ function localizeEquipment(value) {
 
 EXERCISE_CATALOG.forEach(item => { item.name = localizeExerciseName(item.name); item.equipment = localizeEquipment(item.equipment); });
 function exerciseVisual(item) {
-  const name = String(item?.name || '').toLocaleLowerCase('it');
+  const name = String(item?.name || '').toLocaleLowerCase('it').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const id = String(item?.catalog_id || item?.exercise_id || item?.id || '').toLocaleLowerCase('it');
+  // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
+  // consigliata assets/exercises sia i file caricati per errore nella root.
   const customArt = (
-    id === 'panca-piana-bilanciere' || /panca piana con bilanciere|distensioni panca piana bilanciere/.test(name) ? 'panca-piana-bilanciere' :
+    id === 'panca-piana-bilanciere' || (/panca piana/.test(name) && /bilanciere/.test(name) && !/manubri|multipower|presa stretta|pausa/.test(name)) || /distensioni panca piana bilanciere/.test(name) ? 'panca-piana-bilanciere' :
     id === 'panca-inclinata-manubri' || /panca inclinata con manubri|spinte panca inclinata con manubri/.test(name) ? 'panca-inclinata-manubri' :
     id === 'squat-bilanciere' || /squat con bilanciere/.test(name) ? 'squat-bilanciere' :
-    id === 'stacco-convenzionale' || /stacco da terra/.test(name) ? 'stacco-da-terra' :
+    id === 'stacco-da-terra' || id === 'stacco-convenzionale' || /stacco da terra/.test(name) ? 'stacco-da-terra' :
     id === 'lat-machine' || (/lat machine/.test(name) && !/dietro la nuca/.test(name)) ? 'lat-machine' :
     id === 'pulley-basso' || /pulley basso/.test(name) ? 'pulley-basso' :
-    id === 'military-press' || /lento avanti|military press/.test(name) ? 'lento-avanti' :
+    id === 'lento-avanti' || id === 'military-press' || /lento avanti|military press/.test(name) ? 'lento-avanti' :
     id === 'alzate-laterali' || /alzate laterali con manubri/.test(name) ? 'alzate-laterali' :
-    id === 'curl-manubri' || /curl alternato con manubri|curl con manubri in piedi/.test(name) ? 'curl-manubri' :
-    id === 'pushdown-corda' || /push.down per tricipiti con corda/.test(name) ? 'pushdown-corda' : ''
+    id === 'curl-manubri' || /curl con manubri|curl alternato con manubri/.test(name) ? 'curl-manubri' :
+    id === 'pushdown-corda' || /push.?down.*corda|push.?down per tricipiti con corda/.test(name) ? 'pushdown-corda' : ''
   );
   if (customArt) {
-    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${customArt}.webp?v=19" alt="" loading="lazy" decoding="async"></div>`;
+    const file = `${customArt}.webp`;
+    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=20" data-root-fallback="./${file}?v=20" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
   }
   const muscle = item?.muscle_group || 'Fitness';
   const colors = {Petto:'#ff4b55',Schiena:'#ff6b3d',Spalle:'#f24e68',Bicipiti:'#f75a93',Tricipiti:'#ff5b4d',Gambe:'#f04747',Glutei:'#ef6a43',Polpacci:'#ff784e',Addome:'#ed4554'};
   const accent = colors[muscle] || '#ff454f';
-  const name = String(item?.name || '').toLocaleLowerCase('it');
   const bench = /panca|bench|croci|press/.test(name);
   const squat = /squat|pressa|affondi|stacco|calf|leg curl|leg extension|hip thrust/.test(name);
   const pull = /rematore|trazioni|lat machine|pulley|curl|face pull|pulldown/.test(name);
