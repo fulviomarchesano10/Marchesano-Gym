@@ -1,7 +1,7 @@
-const CACHE = 'marchesano-gym-v12-login-persistence';
+const CACHE = 'marchesano-gym-v13-workout-images';
 const CORE = [
-  './', './index.html', './styles.css?v=17', './app.js?v=17', './manifest.webmanifest?v=17',
-  './apple-touch-icon.png', './icon-192.png?v=17', './icon-512.png?v=17',
+  './', './index.html', './styles.css?v=18', './app.js?v=18', './manifest.webmanifest?v=18',
+  './apple-touch-icon.png', './icon-192.png?v=18', './icon-512.png?v=18',
   './logo-mark.png', './marchesano-gym-logo.png'
 ];
 self.addEventListener('install', event => {
