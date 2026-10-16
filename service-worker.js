@@ -1,7 +1,7 @@
-const CACHE = 'marchesano-gym-v16-movement-lab';
+const CACHE = 'marchesano-gym-v17-movement-lab';
 const CORE = [
-  './', './index.html', './styles.css?v=20', './app.js?v=20', './manifest.webmanifest?v=20',
-  './apple-touch-icon.png', './icon-192.png?v=20', './icon-512.png?v=20',
+  './', './index.html', './styles.css?v=21', './app.js?v=21', './manifest.webmanifest?v=21',
+  './apple-touch-icon.png', './icon-192.png?v=21', './icon-512.png?v=21',
   './logo-mark.png', './marchesano-gym-logo.png'
 ];
 self.addEventListener('install', event => {
