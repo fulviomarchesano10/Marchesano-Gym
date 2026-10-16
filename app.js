@@ -424,12 +424,71 @@ const EXERCISE_NAME_IT = {
   'adduction de hanche assise':'Adduzioni dell’anca alla macchina', 'adduction debout (poulie)':'Adduzioni dell’anca in piedi ai cavi',
   '90/90 hamstring / barre-style stretch':'Mobilità 90/90 per i femorali', '90/90 hip switches':'Rotazioni d’anca 90/90', 'ab wheel rollout':'Rotolamento con ruota addominale'
 };
+const DATASET_NAME_OVERRIDES = {
+  '90/90 flessore della coscia':'Mobilità 90/90 per i femorali',
+  'abbraccia le ginocchia al petto':'Ginocchia al petto da sdraiato',
+  'abduttore della coscia':'Abduzioni dell’anca alla macchina',
+  'adduttore della coscia':'Adduzioni dell’anca alla macchina',
+  'affondi con manubri':'Affondi in camminata con manubri',
+  'split squat bulgaro con manubri':'Affondi bulgari con manubri',
+  'curl con manubri inclinato alternato':'Curl alternato con manubri su panca inclinata',
+  'macchina per crunch addominali':'Crunch addominali alla macchina',
+  'ab roller':'Rotolamento con ruota addominale',
+  'ab wheel rollout':'Rotolamento con ruota addominale',
+  'barbell bench press':'Panca piana con bilanciere',
+  'bench press':'Panca piana con bilanciere',
+  'dumbbell bench press':'Panca piana con manubri',
+  'incline dumbbell press':'Panca inclinata con manubri',
+  'incline barbell bench press':'Panca inclinata con bilanciere',
+  'decline barbell bench press':'Panca declinata con bilanciere',
+  'barbell squat':'Squat con bilanciere',
+  'barbell deadlift':'Stacco da terra con bilanciere',
+  'romanian deadlift':'Stacco rumeno',
+  'barbell bent over row':'Rematore con bilanciere',
+  'one arm dumbbell row':'Rematore con manubrio a un braccio',
+  'lat pull down':'Lat machine avanti',
+  'lat pulldown':'Lat machine avanti',
+  'pull up':'Trazioni alla sbarra',
+  'chin up':'Trazioni alla sbarra a presa supina',
+  'barbell curl':'Curl bicipiti con bilanciere',
+  'hammer curls':'Curl a martello con manubri',
+  'dumbbell shoulder press':'Spinte per le spalle con manubri',
+  'military press':'Lento avanti con bilanciere',
+  'lateral raise':'Alzate laterali con manubri',
+  'triceps pushdown':'Push-down per tricipiti ai cavi',
+  'cable triceps pushdown':'Push-down per tricipiti ai cavi',
+  'leg extension':'Estensioni delle gambe alla macchina',
+  'lying leg curls':'Leg curl da sdraiato',
+  'seated leg curl':'Leg curl da seduto',
+  'leg press':'Pressa per le gambe',
+  'hip thrust':'Hip thrust',
+  'standing calf raises':'Sollevamenti sui polpacci in piedi',
+  'seated calf raise':'Sollevamenti sui polpacci da seduto',
+  'plank':'Plank isometrico',
+  'side plank':'Plank laterale',
+  'russian twist':'Torsioni russe per gli addominali',
+  'mountain climbers':'Mountain climber',
+  'push ups':'Piegamenti sulle braccia',
+  'push-up':'Piegamenti sulle braccia',
+  'burpees':'Burpee',
+  'jumping jacks':'Salti a gambe divaricate (jumping jack)',
+  'air bike':'Crunch bicicletta',
+  'treadmill':'Tapis roulant',
+  'stationary bike':'Cyclette',
+  'rowing machine':'Vogatore',
+};
 function localizeExerciseName(name) {
   const raw=String(name||'').trim();
-  return EXERCISE_NAME_IT[raw.toLocaleLowerCase('it')] || raw;
+  const key=raw.toLocaleLowerCase('it').replace(/[’‘]/g,"'").replace(/\s+/g,' ');
+  const mapped = DATASET_NAME_OVERRIDES[key] || EXERCISE_NAME_IT[key];
+  if (mapped) return mapped;
+  // In Italian, exercise names use sentence case rather than capitalizing every word.
+  let clean = raw.charAt(0).toLocaleUpperCase('it') + raw.slice(1).toLocaleLowerCase('it');
+  clean = clean.replace(/\bez\b/gi, 'EZ').replace(/\bt-bar\b/gi, 'T-bar').replace(/\bhiit\b/gi, 'HIIT').replace(/\btrx\b/gi, 'TRX');
+  return clean;
 }
 function localizeEquipment(value) {
-  const map={'bodyweight exercise':'Corpo libero','none (bodyweight exercise)':'Corpo libero','barbell':'Bilanciere','dumbbell':'Manubri','dumbbells':'Manubri','cable machine':'Macchina ai cavi','cable':'Cavi','machine':'Macchina','leverage machine':'Macchina a leve','resistance band':'Elastico','kettlebell':'Kettlebell','pull-up bar':'Sbarra per trazioni','bench':'Panca','smith machine':'Multipower','ez curl bar':'Bilanciere EZ','medicine ball':'Palla medica','gym mat':'Tappetino','incline bench':'Panca inclinata','none':'Corpo libero'};
+  const map={'bodyweight exercise':'Corpo libero','none (bodyweight exercise)':'Corpo libero','barbell':'Bilanciere','dumbbell':'Manubri','dumbbells':'Manubri','cable machine':'Macchina ai cavi','cable':'Cavi','machine':'Macchina','leverage machine':'Macchina a leve','resistance band':'Elastico','kettlebell':'Kettlebell','pull-up bar':'Sbarra per trazioni','bench':'Panca','smith machine':'Multipower','ez curl bar':'Bilanciere EZ','medicine ball':'Palla medica','gym mat':'Tappetino','incline bench':'Panca inclinata','none':'Corpo libero','body only':'Corpo libero','dumbbell':'Manubri','dumbbells':'Manubri','cable machine':'Macchina ai cavi','leverage machine':'Macchina a leve','bands':'Elastico','foam roll':'Rullo massaggiante','exercise ball':'Fitball','medicine ball':'Palla medica','other':'Attrezzatura varia','machine':'Macchina','kettlebells':'Kettlebell','pull-up bar':'Sbarra per trazioni','e-z curl bar':'Bilanciere EZ','ez curl bar':'Bilanciere EZ','rope':'Corda','treadmill':'Tapis roulant','stationary bike':'Cyclette','rowing machine':'Vogatore'};
   return String(value||'').split(',').map(part=>{const key=part.trim().toLocaleLowerCase('it');return map[key]||part.trim();}).filter(Boolean).join(', ');
 }
 
@@ -440,7 +499,8 @@ function exerciseVisual(item) {
   const rawUrl = item.image_url || item.image || '';
   const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
   if (url) {
-    return `<div class="exercise-visual-inner"><img class="exercise-photo" loading="lazy" src="${escapeHtml(url)}" alt="Dimostrazione dell’esercizio: ${escapeHtml(item.name)}" referrerpolicy="no-referrer" onerror="this.closest('.exercise-visual-inner').innerHTML='<div class=\'exercise-photo-unavailable\'><strong>Dimostrazione</strong><small>Foto non disponibile</small></div>'"></div>`;
+    const fallback = typeof item.image_fallback === 'string' ? item.image_fallback.trim() : '';
+    return `<div class="exercise-visual-inner"><img class="exercise-photo" loading="lazy" src="${escapeHtml(url)}" ${fallback?`data-fallback="${escapeHtml(fallback)}"`:''} alt="Dimostrazione dell’esercizio: ${escapeHtml(item.name)}" referrerpolicy="no-referrer" onerror="if(this.dataset.fallback&&!this.dataset.triedFallback){this.dataset.triedFallback='1';this.src=this.dataset.fallback;}else{this.closest('.exercise-visual-inner').innerHTML='<div class=\'exercise-photo-unavailable\'><strong>Dimostrazione</strong><small>Foto non disponibile</small></div>'}"></div>`;
   }
   return `<div class="exercise-photo-unavailable" role="img" aria-label="Foto dimostrativa non disponibile per ${escapeHtml(item.name)}"><div class="photo-placeholder-mark" aria-hidden="true"><span></span><span></span><span></span></div><strong>Dimostrazione</strong><small>Immagine non disponibile</small></div>`;
 }
@@ -477,7 +537,16 @@ function renderExerciseCatalog() {
   const muscle = $('catalogMuscle')?.value || '';
   const equipment = $('catalogEquipment')?.value || '';
   const queryWords=q.split(/\s+/).filter(Boolean);
-  const rows = EXERCISE_CATALOG.filter(x => { const title=String(x.name||'').toLocaleLowerCase('it'); const favorite=isFavoriteExercise(x); return (!muscle || x.muscle_group === muscle) && (!equipment || x.equipment === equipment) && (!favoritesOnly || favorite) && (!queryWords.length || queryWords.every(word=>title.includes(word))); });
+  const rows = EXERCISE_CATALOG.filter(x => {
+    const title=String(x.name||'').toLocaleLowerCase('it');
+    const aliases=Array.isArray(x.aliases)?x.aliases.join(' ').toLocaleLowerCase('it'):'';
+    const favorite=isFavoriteExercise(x);
+    return (!muscle || x.muscle_group === muscle) && (!equipment || x.equipment === equipment) && (!favoritesOnly || favorite) && (!queryWords.length || queryWords.every(word=>title.includes(word)) || queryWords.every(word=>aliases.includes(word)));
+  }).sort((a,b)=>{
+    if(!queryWords.length)return a.name.localeCompare(b.name,'it');
+    const score=x=>queryWords.every(word=>String(x.name||'').toLocaleLowerCase('it').includes(word))?0:1;
+    return score(a)-score(b)||a.name.localeCompare(b.name,'it');
+  });
   const count = $('catalogCount'); if (count) count.textContent = `${rows.length} ${rows.length===1?'esercizio disponibile':'esercizi disponibili'}`;
   if (!rows.length) { list.innerHTML = '<div class="empty-state"><h3>Nessun esercizio trovato</h3><p>Prova un termine diverso oppure modifica i filtri.</p></div>'; $('catalogLoadMore').classList.add('hidden'); return; }
   const shown = rows.slice(0,catalogLimit);
@@ -555,9 +624,11 @@ async function loadOnlineExerciseCatalog(silent=false) {
       const first=paths[0];
       let image=null;
       if(typeof first==='string'&&first){ image=first.startsWith('http')?first:`https://raw.githubusercontent.com/Conte49/free-exercise-db-italian/main/exercises/${first.replace(/^\/+/, '')}`; }
-      const item={name:localizeExerciseName(name),muscle_group:group,equipment,instructions:stripHtml(instructions),image,source:'free-exercise-db-italian',source_id:row.id||null,primary_muscles:row.primaryMuscles||[],secondary_muscles:row.secondaryMuscles||[]};
+      const imageFallback=(typeof row.webp==='string'&&row.webp)?`https://raw.githubusercontent.com/Conte49/free-exercise-db-italian/main/dist/exercises/${row.webp.replace(/^\/+/, '')}`:null;
+      if(!image && imageFallback){ image=imageFallback; }
+      const item={name:localizeExerciseName(name),muscle_group:group,equipment,instructions:stripHtml(instructions),image,image_fallback:imageFallback,source:'free-exercise-db-italian',source_id:row.id||null,aliases:[row.name||'',row.name_it||'',row.id||''].filter(Boolean),primary_muscles:row.primaryMuscles||[],secondary_muscles:row.secondaryMuscles||[]};
       const key=item.name.toLocaleLowerCase('it'); const existing=merged.get(key);
-      if(existing){ if(image&&!existing.image)existing.image=image; if(item.instructions&&(!existing.instructions||existing.instructions.length<30))existing.instructions=item.instructions; if(existing.muscle_group==='Altro'&&group!=='Altro')existing.muscle_group=group; if((!existing.equipment||existing.equipment==='Attrezzatura varia')&&equipment)existing.equipment=equipment; }
+      if(existing){ if(image&&!existing.image)existing.image=image; if(item.image_fallback&&!existing.image_fallback)existing.image_fallback=item.image_fallback; if(item.instructions&&(!existing.instructions||existing.instructions.length<30))existing.instructions=item.instructions; if(existing.muscle_group==='Altro'&&group!=='Altro')existing.muscle_group=group; if((!existing.equipment||existing.equipment==='Attrezzatura varia')&&equipment)existing.equipment=equipment; existing.aliases=[...new Set([...(existing.aliases||[]),...(item.aliases||[])])]; if(item.source_id&&!existing.source_id)existing.source_id=item.source_id; }
       else {merged.set(key,item);imported++;}
       if(image)withImages++;
     }
