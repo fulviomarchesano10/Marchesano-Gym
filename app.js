@@ -4,6 +4,9 @@ const SUPABASE_URL = 'https://dkghztezhnheblmfkvzn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZ2h6dGV6aG5oZWJsbWZrdnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxMzg3MDcsImV4cCI6MjEwNzcxNDcwN30.HYUi_VMGOe8oSUy02VOWqeeYsOuiyAZmhavFqQUJ-c0';
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+const DUMBBELL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 6v12M9 10v4M9 12h6M15 10v4M18 6v12M21 9v6"/></svg>';
+const TRASH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg>';
+
 const $ = (id) => document.getElementById(id);
 let isRegister = false;
 let currentUser = null;
@@ -167,11 +170,14 @@ function openPlanDetails(plan) {
   toolBackAction = () => openPlansView();
   $('toolTitle').textContent = plan.name;
   $('toolContent').innerHTML = `<div class="page-intro"><p>${escapeHtml(plan.description || 'La tua scheda personale')}</p><span class="pill">${escapeHtml(plan.color || '#ff3038') === '#ff3038' ? 'SCHEDA PERSONALE' : 'PROGRAMMA PERSONALE'}</span></div>
-    <div class="plan-action-row"><button id="startThisPlan" class="primary-button start-plan-button" type="button">▶ Inizia allenamento</button><button id="planAddExercise" class="secondary-button" type="button">＋ Aggiungi esercizi</button></div><div class="section-heading page-section-heading"><div><p class="eyebrow">PROGRAMMA</p><h2>Esercizi della scheda</h2></div></div>
+    <div class="plan-action-row"><button id="startThisPlan" class="primary-button start-plan-button" type="button"><span class="button-icon">${DUMBBELL_ICON}</span> Inizia allenamento</button><button id="planAddExercise" class="secondary-button" type="button">＋ Aggiungi esercizi</button></div>
+    <div class="plan-danger-row"><button id="deleteThisPlan" class="danger-text-button" type="button">${TRASH_ICON}<span>Elimina questa scheda</span></button></div>
+    <div class="section-heading page-section-heading"><div><p class="eyebrow">PROGRAMMA</p><h2>Esercizi della scheda</h2></div></div>
     <div class="plan-exercises" id="planExerciseList"><p class="muted">Caricamento esercizi della scheda…</p></div>`;
   showToolPage('plans');
   $('planAddExercise').addEventListener('click', () => openExerciseLibrary(plan));
   $('startThisPlan').addEventListener('click', () => startGuidedWorkout(plan));
+  $('deleteThisPlan').addEventListener('click', () => deleteWorkoutPlan(plan));
   loadPlanExercises(plan);
 }
 $('closeToolDialog').addEventListener('click', () => {
@@ -498,6 +504,21 @@ async function addExerciseToPlan(plan, exercise) {
   const { error } = await supabase.from('plan_exercises').insert({ user_id: currentUser.id, plan_id: plan.id, exercise_id: exercise.id, sets: 3, reps: 10, rest_seconds: 90, sort_order: nextOrder });
   if (error) throw new Error(`Esercizio salvato nella libreria, ma non aggiunto alla scheda: ${error.message}. Verifica la configurazione SQL inclusa nel pacchetto.`);
 }
+async function deleteWorkoutPlan(plan, returnToList = true) {
+  if (!currentUser || !plan) return;
+  const confirmed = window.confirm(`Vuoi eliminare la scheda “${plan.name}”? Gli esercizi verranno rimossi da questa scheda, ma resteranno nella libreria. Le sessioni già registrate non verranno cancellate.`);
+  if (!confirmed) return;
+  const { error } = await supabase.from('workout_plans').delete().eq('id', plan.id).eq('user_id', currentUser.id);
+  if (error) {
+    message('catalogMessage', `Non riesco a eliminare la scheda: ${error.message}`, true);
+    return;
+  }
+  plans = plans.filter(item => item.id !== plan.id);
+  activePlanForExercise = null;
+  await loadDashboardData();
+  if (returnToList) openPlansView(); else showDashboard();
+}
+
 async function loadPlanExercises(plan) {
   const el = $('planExerciseList'); if (!el) return;
   const { data: rows, error } = await supabase.from('plan_exercises').select('*').eq('user_id', currentUser.id).eq('plan_id', plan.id).order('sort_order');
@@ -507,8 +528,12 @@ async function loadPlanExercises(plan) {
   const { data: exercises, error: exError } = await supabase.from('exercises').select('id,name,muscle_group,equipment').eq('user_id',currentUser.id).in('id',ids);
   if (exError) { el.innerHTML = `<p class="status-message">${escapeHtml(exError.message)}</p>`; return; }
   const map = new Map((exercises||[]).map(x=>[x.id,x]));
-  el.innerHTML = rows.map((r,idx)=>{const x=map.get(r.exercise_id); if(!x) return ''; return `<article class="exercise-card plan-exercise-card"><div><strong>${escapeHtml(x.name)}</strong><p>${escapeHtml(x.muscle_group||'')} · ${escapeHtml(x.equipment||'')}</p><small>${Number(r.sets)||3} serie × ${Number(r.reps)||10} ripetizioni · recupero ${Number(r.rest_seconds)||90}s</small></div><button class="remove-exercise-button" type="button" data-remove-plan-exercise="${r.id}" aria-label="Rimuovi ${escapeHtml(x.name)}">×</button></article>`}).join('');
-  el.querySelectorAll('[data-remove-plan-exercise]').forEach(btn=>btn.addEventListener('click',async()=>{btn.disabled=true;const {error}=await supabase.from('plan_exercises').delete().eq('id',btn.dataset.removePlanExercise).eq('user_id',currentUser.id);if(error){message('catalogMessage',error.message,true);btn.disabled=false;return;}await loadPlanExercises(plan);}));
+  el.innerHTML = rows.map((r,idx)=>{const x=map.get(r.exercise_id); if(!x) return ''; return `<article class="exercise-card plan-exercise-card"><div><strong>${escapeHtml(x.name)}</strong><p>${escapeHtml(x.muscle_group||'')} · ${escapeHtml(x.equipment||'')}</p><small>${Number(r.sets)||3} serie × ${Number(r.reps)||10} ripetizioni · recupero ${Number(r.rest_seconds)||90}s</small></div><button class="remove-exercise-button" type="button" data-remove-plan-exercise="${r.id}" aria-label="Rimuovi ${escapeHtml(x.name)} dalla scheda" title="Rimuovi dalla scheda">${TRASH_ICON}</button></article>`}).join('');
+  el.querySelectorAll('[data-remove-plan-exercise]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const card=btn.closest('.plan-exercise-card'); const name=card?.querySelector('strong')?.textContent||'questo esercizio';
+    if(!window.confirm(`Vuoi rimuovere “${name}” da questa scheda? L'esercizio resterà nella libreria.`)) return;
+    btn.disabled=true;const {error}=await supabase.from('plan_exercises').delete().eq('id',btn.dataset.removePlanExercise).eq('user_id',currentUser.id);if(error){message('catalogMessage',error.message,true);btn.disabled=false;return;}await loadPlanExercises(plan);
+  }));
 }
 async function loadExercises() {
   const list=$('exerciseList'); if(!list||!currentUser)return;
@@ -574,10 +599,11 @@ async function saveMetric(e) {
 function openPlansView() {
   activePlanForExercise=null;
   toolBackAction=()=>showDashboard();
-  const cards=plans.length ? plans.map(p=>`<article class="plan-card" style="--plan-color:${escapeHtml(p.color||'#ff3038')}"><div class="plan-card-icon">▦</div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'Scheda personale')}</p><div class="plan-meta"><span>${escapeHtml((p.created_at?new Date(p.created_at):new Date()).toLocaleDateString('it-IT'))}</span><button type="button" data-open-plan="${p.id}">Apri scheda →</button></div></article>`).join(''):'<div class="empty-state"><span class="empty-icon">＋</span><h3>Ancora nessuna scheda</h3><p>Crea la tua prima scheda, poi aggiungi gli esercizi direttamente dal catalogo già integrato.</p></div>';
+  const cards=plans.length ? plans.map(p=>`<article class="plan-card" style="--plan-color:${escapeHtml(p.color||'#ff3038')}"><div class="plan-card-topline"><div class="plan-card-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h4"></path></svg></div><button class="plan-delete-icon" type="button" data-delete-plan="${p.id}" aria-label="Elimina la scheda ${escapeHtml(p.name)}" title="Elimina scheda">${TRASH_ICON}</button></div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.description||'Scheda personale')}</p><div class="plan-meta"><span>${escapeHtml((p.created_at?new Date(p.created_at):new Date()).toLocaleDateString('it-IT'))}</span><button type="button" data-open-plan="${p.id}">Apri scheda →</button></div></article>`).join(''):'<div class="empty-state"><span class="empty-icon">＋</span><h3>Ancora nessuna scheda</h3><p>Crea la tua prima scheda, poi aggiungi gli esercizi direttamente dal catalogo già integrato.</p></div>';
   openTool('Le mie schede', `<div class="page-intro"><p>Programmi personali e gruppi muscolari. Apri una scheda per aggiungere esercizi dal catalogo.</p></div><button id="addPlanFromList" class="primary-button" type="button">＋ Crea nuova scheda <span>→</span></button><div class="section-heading page-section-heading"><div><p class="eyebrow">I TUOI PROGRAMMI</p><h2>${plans.length} ${plans.length===1?'scheda salvata':'schede salvate'}</h2></div></div><div class="plans-grid">${cards}</div>`);
   $('addPlanFromList')?.addEventListener('click',openPlanDialog);
   $('toolContent').querySelectorAll('[data-open-plan]').forEach(btn=>btn.addEventListener('click',()=>openPlanDetails(plans.find(p=>p.id===btn.dataset.openPlan))));
+  $('toolContent').querySelectorAll('[data-delete-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=plans.find(p=>p.id===btn.dataset.deletePlan);if(!plan)return;btn.disabled=true;await deleteWorkoutPlan(plan,true);}));
 }
 function openProfileView() {
   openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=14" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><div class="profile-account-line"><span class="profile-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span><span><small>Account collegato</small><strong>${escapeHtml(currentUser?.email || '—')}</strong></span></div><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="secondary-button profile-logout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Logout</button></div>`);
