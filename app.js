@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://dkghztezhnheblmfkvzn.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_bdpy-S_n7vltkHymA6H9BA_EPB-nugU';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_bdpy-S_n7vltkHvmA6H9BA_EPB-nugU';
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const $ = (id) => document.getElementById(id);
