@@ -2,7 +2,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://dkghztezhnheblmfkvzn.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZ2h6dGV6aG5oZWJsbWZrdnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxMzg3MDcsImV4cCI6MjEwNzcxNDcwN30.HYUi_VMGOe8oSUy02VOWqeeYsOuiyAZmhavFqQUJ-c0';
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage
+  }
+});
 
 const DUMBBELL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6M6 6v12M9 10v4M9 12h6M15 10v4M18 6v12M21 9v6"/></svg>';
 const TRASH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 13h11l1-13M9 7V4h6v3"/></svg>';
@@ -27,6 +34,20 @@ function message(id, text, error = false) {
   if (!el) return;
   el.textContent = text || '';
   el.style.color = error ? '#ff7773' : '';
+}
+const REMEMBERED_EMAIL_KEY = 'marchesano-gym-remembered-email';
+function loadRememberedEmail() {
+  try {
+    const remembered = localStorage.getItem(REMEMBERED_EMAIL_KEY) || '';
+    $('email').value = remembered;
+    $('rememberEmail').checked = Boolean(remembered);
+  } catch (_) {}
+}
+function saveRememberedEmail(email) {
+  try {
+    if ($('rememberEmail').checked) localStorage.setItem(REMEMBERED_EMAIL_KEY, email.trim());
+    else localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+  } catch (_) {}
 }
 function showAuth() {
   $('authView').classList.remove('hidden');
@@ -56,6 +77,14 @@ function setAuthMode() {
   $('password').autocomplete = isRegister ? 'new-password' : 'current-password';
 }
 $('toggleAuth').addEventListener('click', () => { isRegister = !isRegister; message('authMessage',''); setAuthMode(); });
+$('rememberEmail').addEventListener('change', () => {
+  if ($('rememberEmail').checked) saveRememberedEmail($('email').value);
+  else { try { localStorage.removeItem(REMEMBERED_EMAIL_KEY); } catch (_) {} }
+});
+$('email').addEventListener('change', () => {
+  if ($('rememberEmail').checked) saveRememberedEmail($('email').value);
+});
+loadRememberedEmail();
 $('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('email').value.trim();
@@ -74,6 +103,7 @@ $('authForm').addEventListener('submit', async (e) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     }
+    saveRememberedEmail(email);
     message('authMessage','');
     await loadApp();
   } catch (err) {
@@ -606,7 +636,7 @@ function openPlansView() {
   $('toolContent').querySelectorAll('[data-delete-plan]').forEach(btn=>btn.addEventListener('click',async()=>{const plan=plans.find(p=>p.id===btn.dataset.deletePlan);if(!plan)return;btn.disabled=true;await deleteWorkoutPlan(plan,true);}));
 }
 function openProfileView() {
-  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=14" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><div class="profile-account-line"><span class="profile-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span><span><small>Account collegato</small><strong>${escapeHtml(currentUser?.email || '—')}</strong></span></div><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="secondary-button profile-logout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Logout</button></div>`);
+  openTool('Profilo', `<div class="profile-panel page-profile"><div class="profile-mark"><img src="./logo-mark.png?v=16" alt="Marchesano Gym"></div><p class="eyebrow">AREA PERSONALE</p><h2>Il tuo percorso</h2><div class="profile-account-line"><span class="profile-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg></span><span><small>Account collegato</small><strong>${escapeHtml(currentUser?.email || '—')}</strong></span></div><p class="muted">Gestisci i dati personali e monitora i cambiamenti del tuo corpo.</p><button id="profileMeasures" class="primary-button" type="button">Peso e misure <span>→</span></button><button id="profileCalendar" class="secondary-button profile-secondary" type="button">Calendario allenamenti →</button><button id="profileLogout" class="secondary-button profile-logout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"></path><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"></path></svg>Logout</button></div>`);
   $('profileMeasures')?.addEventListener('click',()=>openTool('Peso e misure'));
   $('profileCalendar')?.addEventListener('click',()=>openTool('Calendario'));
   $('profileLogout')?.addEventListener('click',async()=>{await supabase.auth.signOut();currentUser=null;showAuth();});
@@ -625,6 +655,6 @@ document.querySelectorAll('#bottomNav [data-nav]').forEach(btn=>btn.addEventList
   if(nav==='history'){activePlanForExercise=null;openTool('Storico allenamenti');return;}
   if(nav==='profile'){activePlanForExercise=null;openProfileView();return;}
 }));
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=11').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();

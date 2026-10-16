@@ -148,3 +148,70 @@ svg{display:block;width:1em;height:1em;fill:none;stroke:currentColor;stroke-widt
 .remove-exercise-button{display:grid;place-items:center;width:42px;height:42px;min-width:42px;padding:10px;border:1px solid #ff30384a;background:#ff30380c;color:#ff777d;border-radius:12px}
 .remove-exercise-button svg{width:19px;height:19px;display:block}
 @media(max-width:520px){.plan-danger-row{margin:-5px 0 20px}.danger-text-button{width:100%;min-height:44px}.plan-card-topline{margin-bottom:10px}}
+
+
+/* Marchesano Gym v11 — accesso compatto su iPhone, senza schermata introduttiva lunga */
+@media (max-width: 760px) {
+  body:has(#authView:not(.hidden)) { padding-bottom: max(10px, env(safe-area-inset-bottom)); min-height: 100svh; }
+  #authView.auth-layout { display:flex; flex-direction:column; justify-content:flex-start; align-items:stretch; gap:0; min-height:0; padding:14px 0 18px; }
+  #authView .hero-copy { display:none !important; }
+  #authView .auth-panel { width:100%; max-width:none; justify-self:stretch; padding:18px 20px 14px; border-radius:22px; box-shadow:0 12px 35px #0002; }
+  #authView .panel-heading { margin-bottom:12px; }
+  #authView .panel-heading h2 { font-size:25px; margin-bottom:4px; }
+  #authView .panel-heading .eyebrow { margin-bottom:6px; }
+  #authView .panel-heading .muted { font-size:12px; line-height:1.35; }
+  #authView label { margin:10px 0; font-size:12px; }
+  #authView input { margin-top:6px; padding:12px 13px; min-height:46px; border-radius:12px; }
+  #authView #authSubmit { min-height:48px; padding:12px 15px; margin-top:3px; }
+  #authView #toggleAuth { margin-top:5px; padding:9px 4px; line-height:1.35; font-size:11px; }
+  #authView .status-message { min-height:0; margin:3px 0 0; }
+}
+/* Le regole generiche dei pulsanti delle schede non devono nascondere il cestino. */
+.plan-card .plan-delete-icon { display:grid; place-items:center; width:40px; height:40px; flex:0 0 40px; padding:10px; border:1px solid #ff30385c; border-radius:12px; background:#ff303815; color:#ff777d; }
+.plan-card .plan-delete-icon svg { display:block; width:19px; height:19px; }
+.plan-card .plan-delete-icon:disabled { opacity:.55; }
+.start-plan-button { display:flex; align-items:center; justify-content:center; gap:10px; }
+.start-plan-button .button-icon { display:inline-grid; place-items:center; width:30px; height:30px; flex:0 0 30px; color:#fff; }
+.start-plan-button .button-icon svg { display:block; width:25px; height:25px; }
+
+
+/* v12 — login più pratico, email ricordata e campi riconoscibili da iCloud Keychain */
+.login-options { margin: 8px 0 4px; }
+.login-options .remember-email {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 0 5px;
+  color: var(--text);
+  font-size: 12px;
+}
+.login-options .remember-email input {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
+  flex: 0 0 17px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.login-helper {
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+@media (max-width: 760px) {
+  #authView.auth-layout { padding-top: 8px; padding-bottom: 10px; }
+  #authView .auth-panel { padding: 16px 18px 12px; }
+  #authView .panel-heading { margin-bottom: 9px; }
+  #authView .panel-heading h2 { font-size: 24px; }
+  #authView label { margin: 8px 0; }
+  #authView input:not([type="checkbox"]) { min-height: 44px; padding: 11px 13px; }
+  #authView #authSubmit { min-height: 46px; margin-top: 3px; }
+  #authView #toggleAuth { margin-top: 3px; padding: 7px 4px; }
+  #authView .status-message { margin: 0; }
+  #authView .login-helper { font-size: 10px; }
+}
