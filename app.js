@@ -27,6 +27,7 @@ function showDashboard() {
   $('bottomNav').classList.remove('hidden');
   $('logoutBtn').classList.remove('hidden');
   $('todayLabel').textContent = new Intl.DateTimeFormat('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(new Date());
+  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
 }
 function setAuthMode() {
   $('authTitle').textContent = isRegister ? 'Crea il tuo account' : 'Bentornato';
@@ -94,7 +95,7 @@ function renderPlans() {
   plans.forEach(plan => {
     const card = document.createElement('article');
     card.className = 'plan-card';
-    card.style.setProperty('--plan-color', plan.color || '#D6FF42');
+    card.style.setProperty('--plan-color', plan.color || '#FF3038');
     const h = document.createElement('h3'); h.textContent = plan.name;
     const p = document.createElement('p'); p.textContent = plan.description || 'Scheda personale pronta per essere organizzata.';
     const meta = document.createElement('div'); meta.className = 'plan-meta';
@@ -221,4 +222,5 @@ document.querySelectorAll('[data-nav]').forEach(btn => btn.addEventListener('cli
   if (navMap[btn.dataset.nav]) openTool(navMap[btn.dataset.nav]);
 }));
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();

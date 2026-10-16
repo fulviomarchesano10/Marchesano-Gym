@@ -5,13 +5,13 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#101114",
+  "background_color": "#080809",
   "theme_color": "#101114",
   "icons": [
     {
-      "src": "./icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icons/logo-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

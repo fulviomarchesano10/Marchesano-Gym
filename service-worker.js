@@ -1,5 +1,5 @@
-const CACHE = 'marchesano-gym-v1';
-const CORE = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icons/icon.svg'];
+const CACHE = 'marchesano-gym-v2-red';
+const CORE = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icons/icon.svg', './icons/logo-mark.png', './assets/marchesano-gym-logo.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
 });

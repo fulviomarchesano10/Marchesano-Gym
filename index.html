@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="./icons/logo-mark.png">
   <meta name="theme-color" content="#101114">
   <meta name="description" content="Marchesano Gym — il tuo sistema personale di allenamento.">
   <link rel="manifest" href="./manifest.webmanifest">
@@ -14,7 +17,7 @@
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="./" aria-label="Marchesano Gym home">
-        <span class="brand-mark">M<span>G</span></span>
+        <img class="brand-logo" src="./icons/logo-mark.png" alt="Logo Marchesano Gym">
         <span><strong>MARCHESANO <em>GYM</em></strong><small>YOUR PERSONAL TRAINING SYSTEM</small></span>
       </a>
       <button id="logoutBtn" class="icon-button hidden" aria-label="Esci" title="Esci">↗</button>
@@ -23,6 +26,7 @@
     <main>
       <section id="authView" class="auth-layout">
         <div class="hero-copy">
+          <img class="hero-logo" src="./assets/marchesano-gym-logo.png" alt="Marchesano Gym — logo rosso e nero">
           <p class="eyebrow">DISCIPLINA. COSTANZA. PROGRESSI.</p>
           <h1>Costruisci<br>la tua <span>forza.</span></h1>
           <p class="muted">Le tue schede, i tuoi carichi e ogni allenamento, in un unico posto.</p>
@@ -80,7 +84,7 @@
       <div class="modal-heading"><div><p class="eyebrow">NUOVA SCHEDA</p><h2>Crea allenamento</h2></div><button type="button" class="icon-button" id="closePlanDialog">×</button></div>
       <label>Nome della scheda<input id="planName" maxlength="80" placeholder="Es. Petto / Spalle / Tricipiti" required></label>
       <label>Descrizione<textarea id="planDescription" rows="3" placeholder="Obiettivo, note o gruppo muscolare"></textarea></label>
-      <label>Colore scheda<select id="planColor"><option value="#D6FF42">Verde fluo</option><option value="#FF514D">Rosso</option><option value="#7C8CFF">Blu</option><option value="#B18CFF">Viola</option></select></label>
+      <label>Colore scheda<select id="planColor"><option value="#FF3038" selected>Rosso</option><option value="#7C8CFF">Blu</option><option value="#B18CFF">Viola</option></select></label>
       <p id="planMessage" class="status-message"></p>
       <button class="primary-button" type="submit">Salva scheda <span>→</span></button>
     </form>
