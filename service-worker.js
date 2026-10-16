@@ -1,5 +1,20 @@
-const CACHE = 'marchesano-gym-v4-logo-definitivo';
-const CORE = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icons/icon-192.png?v=4', './icons/logo-mark.png?v=4', './icons/icon-192.png?v=4', './icons/icon-512.png?v=4', './icons/apple-touch-icon.png?v=4', './assets/marchesano-gym-logo.png?v=4'];
-self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting())); });
-self.addEventListener('activate', event => { event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())); });
-self.addEventListener('fetch', event => { const url = new URL(event.request.url); if (event.request.method !== 'GET' || url.origin !== self.location.origin) return; event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => { if (response.ok) { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(event.request, copy)); } return response; }).catch(() => cached))); });
+const CACHE = 'marchesano-gym-v5-logo-rootpaths';
+const CORE = [
+  './', './index.html', './styles.css', './app.js', './manifest.webmanifest?v=5',
+  './apple-touch-icon.png?v=5', './icon-192.png?v=5', './icon-512.png?v=5',
+  './logo-mark.png?v=5', './marchesano-gym-logo.png?v=5'
+];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+    if (response.ok) { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(event.request, copy)); }
+    return response;
+  }).catch(() => cached)));
+});
