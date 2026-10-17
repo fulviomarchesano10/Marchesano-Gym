@@ -277,3 +277,14 @@ svg{display:block;width:1em;height:1em;fill:none;stroke:currentColor;stroke-widt
 .workout-toolbar{position:sticky;top:0;z-index:8;padding:8px 0;background:#0d0e11f2;backdrop-filter:blur(14px);border-radius:0 0 18px 18px;box-shadow:0 8px 18px #0004;align-items:stretch}
 .workout-toolbar label{font-size:12px}.workout-toolbar label input{width:100%}
 @media(max-width:520px){.workout-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:7px}.workout-toolbar label{padding:9px;border-radius:14px;font-size:10px}.workout-toolbar label input{margin-top:5px;min-height:42px;padding:7px}.rest-clock{padding:9px;gap:3px 6px;grid-template-columns:1fr auto}.rest-clock strong{font-size:24px}.rest-clock button{font-size:10px;padding:8px 7px;white-space:nowrap}.rest-clock .text-button{font-size:10px}}
+/* Allenamento mobile: timer sempre raggiungibile sopra la barra inferiore, fuori dalla Dynamic Island. */
+.workout-toolbar{position:fixed!important;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));top:auto!important;z-index:30;display:grid;grid-template-columns:minmax(94px,.72fr) minmax(0,1.28fr);gap:8px;margin:0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(14,15,19,.97);backdrop-filter:blur(18px);border-top:1px solid #ffffff20;border-radius:18px 18px 0 0;box-shadow:0 -10px 32px #0008;}
+.workout-toolbar label{align-self:stretch;display:flex;flex-direction:column;justify-content:center;margin:0;padding:8px 10px;font-size:10px;line-height:1.2;min-width:0;}
+.workout-toolbar label input{margin-top:6px;min-height:40px;padding:7px;font-size:17px;}
+.rest-clock{grid-template-columns:1fr auto;gap:2px 7px;padding:7px 9px;min-width:0;}
+.rest-clock>span{font-size:8px;letter-spacing:1px;grid-column:1;grid-row:1;}
+.rest-clock strong{font-size:clamp(23px,6vw,31px);grid-column:1;grid-row:2;line-height:1.15;}
+.rest-clock button{grid-column:2;grid-row:1/3;padding:9px 8px;font-size:10px;}
+.rest-clock .text-button{grid-column:1/-1;grid-row:3;padding:2px;margin:0;font-size:10px;}
+.page-view #toolContent:has(.active-workout-header){padding-bottom:190px;}
+@media(max-width:520px){.workout-toolbar{grid-template-columns:minmax(90px,.72fr) minmax(0,1.28fr);gap:7px;bottom:calc(62px + env(safe-area-inset-bottom));padding:8px 9px calc(8px + env(safe-area-inset-bottom));}.workout-toolbar label{padding:7px 8px;font-size:9px}.workout-toolbar label input{min-height:38px;font-size:16px}.rest-clock{padding:7px 8px}.rest-clock strong{font-size:25px}.rest-clock button{font-size:9px;padding:8px 6px}.page-view #toolContent:has(.active-workout-header){padding-bottom:180px;}}
