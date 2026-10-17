@@ -498,31 +498,62 @@ function exerciseVisual(item) {
   const id = String(item?.catalog_id || item?.exercise_id || item?.id || '').toLocaleLowerCase('it');
   // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
   // consigliata assets/exercises sia i file caricati per errore nella root.
-  const customArt = (
-    id === 'panca-piana-bilanciere' ? 'panca-piana-bilanciere' :
-    id === 'panca-piana-manubri' ? 'panca-piana-manubri' :
-    id === 'panca-inclinata-bilanciere' ? 'panca-inclinata-bilanciere' :
-    id === 'panca-inclinata-manubri' ? 'panca-inclinata-manubri' :
-    id === 'chest-press' ? 'chest-press' :
-    id === 'croci-manubri-piana' ? 'croci-manubri-piana' :
-    id === 'croci-cavi' ? 'croci-cavi' :
-    id === 'pec-deck' ? 'pec-deck' :
-    id === 'push-up' ? 'push-up' :
-    id === 'dip-petto' ? 'dip-petto' :
-    id === 'panca-piana-bilanciere' || (/panca piana/.test(name) && /bilanciere/.test(name) && !/manubri|multipower|presa stretta|pausa|french press|tricipiti|skull crusher|estensioni/.test(name)) || (/distensioni panca piana bilanciere/.test(name) && !/french press|tricipiti|skull crusher|estensioni/.test(name)) ? 'panca-piana-bilanciere' :
-    id === 'panca-inclinata-manubri' || /panca inclinata con manubri|spinte panca inclinata con manubri/.test(name) ? 'panca-inclinata-manubri' :
-    id === 'squat-bilanciere' || /squat con bilanciere/.test(name) ? 'squat-bilanciere' :
-    id === 'stacco-da-terra' || id === 'stacco-convenzionale' || /stacco da terra/.test(name) ? 'stacco-da-terra' :
-    id === 'lat-machine' || (/lat machine/.test(name) && !/dietro la nuca/.test(name)) ? 'lat-machine' :
-    id === 'pulley-basso' || /pulley basso/.test(name) ? 'pulley-basso' :
-    id === 'lento-avanti' || id === 'military-press' || /lento avanti|military press/.test(name) ? 'lento-avanti' :
-    id === 'alzate-laterali' || /alzate laterali con manubri/.test(name) ? 'alzate-laterali' :
-    id === 'curl-manubri' || ((/curl con manubri|curl alternato con manubri/.test(name)) && !/panca inclinata|su panca inclinata|scott|preacher|spider/.test(name) && !/curl-panca-inclinata/.test(id)) ? 'curl-manubri' :
-    id === 'pushdown-corda' || /push.?down.*corda|push.?down per tricipiti con corda/.test(name) ? 'pushdown-corda' : ''
-  );
+  // Mappatura esplicita: usa l'ID quando è quello del catalogo, altrimenti il nome normalizzato.
+  // Non usare immagini simili per esercizi diversi: in caso di dubbio resta l'illustrazione generica.
+  const artById = {
+    'panca-piana-bilanciere':'panca-piana-bilanciere',
+    'panca-piana-manubri':'panca-piana-manubri',
+    'panca-inclinata-bilanciere':'panca-inclinata-bilanciere',
+    'panca-inclinata-manubri':'panca-inclinata-manubri',
+    'chest-press':'chest-press',
+    'croci-manubri-piana':'croci-manubri-piana',
+    'croci-cavi':'croci-cavi',
+    'pec-deck':'pec-deck',
+    'push-up':'push-up',
+    'dip-petto':'dip-petto',
+    'squat-bilanciere':'squat-bilanciere',
+    'stacco-da-terra':'stacco-da-terra',
+    'stacco-convenzionale':'stacco-da-terra',
+    'lat-machine':'lat-machine',
+    'pulley-basso':'pulley-basso',
+    'lento-avanti':'lento-avanti',
+    'military-press':'lento-avanti',
+    'alzate-laterali':'alzate-laterali',
+    'curl-manubri':'curl-manubri',
+    'pushdown-corda':'pushdown-corda'
+  };
+  const nameKey = name.replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+  const artByName = [
+    [/^(panca piana con bilanciere|distensioni su panca piana con bilanciere|bench press con bilanciere)$/, 'panca-piana-bilanciere'],
+    [/^(panca piana con manubri|distensioni su panca piana con manubri)$/, 'panca-piana-manubri'],
+    [/^(panca inclinata con bilanciere|distensioni su panca inclinata con bilanciere)$/, 'panca-inclinata-bilanciere'],
+    [/^(panca inclinata con manubri|distensioni su panca inclinata con manubri)$/, 'panca-inclinata-manubri'],
+    [/^(chest press|chest press alla macchina|spinte al petto alla macchina)$/, 'chest-press'],
+    [/^(croci con manubri su panca piana|croci manubri panca piana)$/, 'croci-manubri-piana'],
+    [/^(croci ai cavi|cable fly|cable crossover)$/, 'croci-cavi'],
+    [/^(pec deck|pec deck butterfly|butterfly|pec deck butterfly macchina)$/, 'pec-deck'],
+    [/^(piegamenti sulle braccia|push up|push up sulle braccia|flessioni)$/, 'push-up'],
+    [/^(dip alle parallele focus petto|dip alle parallele|dip focus petto|dips)$/, 'dip-petto'],
+    [/^(squat con bilanciere|back squat con bilanciere)$/, 'squat-bilanciere'],
+    [/^(stacco da terra|stacco convenzionale|deadlift)$/, 'stacco-da-terra'],
+    [/^(lat machine presa prona|lat machine avanti|lat pulldown)$/, 'lat-machine'],
+    [/^(pulley basso|pulley basso da seduto|rematore al pulley basso)$/, 'pulley-basso'],
+    [/^(lento avanti con bilanciere|military press con bilanciere|military press)$/, 'lento-avanti'],
+    [/^(alzate laterali con manubri|alzate laterali)$/, 'alzate-laterali'],
+    [/^(curl con manubri|curl alternato con manubri|curl con manubri in piedi)$/, 'curl-manubri'],
+    [/^(push down per tricipiti con corda|push down con corda|pushdown per tricipiti con corda|triceps pushdown)$/, 'pushdown-corda']
+  ];
+  let customArt = artById[id] || '';
+  if (!customArt) {
+    const exact = artByName.find(([pattern]) => pattern.test(nameKey));
+    if (exact) customArt = exact[1];
+  }
+  // Protezione esplicita: non associare l'immagine del push-down in piedi alla variante su panca inclinata.
+  if (/push.?down/.test(nameKey) && /panca inclinata/.test(nameKey)) customArt = '';
+
   if (customArt) {
     const file = `${customArt}.webp`;
-    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=23" data-root-fallback="./${file}?v=23" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
+    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=24" data-root-fallback="./${file}?v=24" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
   }
   const muscle = item?.muscle_group || 'Fitness';
   const colors = {Petto:'#ff4b55',Schiena:'#ff6b3d',Spalle:'#f24e68',Bicipiti:'#f75a93',Tricipiti:'#ff5b4d',Gambe:'#f04747',Glutei:'#ef6a43',Polpacci:'#ff784e',Addome:'#ed4554'};
@@ -866,6 +897,6 @@ document.querySelectorAll('#bottomNav [data-nav]').forEach(btn=>btn.addEventList
   if(nav==='history'){activePlanForExercise=null;openTool('Diario allenamenti');return;}
   if(nav==='profile'){activePlanForExercise=null;openProfileView();return;}
 }));
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=23').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=24').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();
