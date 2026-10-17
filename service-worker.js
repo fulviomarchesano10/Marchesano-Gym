@@ -1,40 +1,47 @@
-const CACHE = 'marchesano-gym-v28-guide-tecniche';
-const CORE = [
-  './', './index.html', './styles.css?v=25', './app.js?v=31', './manifest.webmanifest?v=23',
-  './apple-touch-icon.png?v=22', './icon-192.png?v=22', './icon-512.png?v=22',
-  './icon.svg?v=22', './logo-mark.png?v=22', './marchesano-gym-logo.png?v=22',
-  './panca-piana-bilanciere.webp?v=25', './panca-piana-manubri.webp?v=25',
-  './panca-inclinata-bilanciere.webp?v=25', './panca-inclinata-manubri.webp?v=25',
-  './chest-press.webp?v=25', './croci-manubri-piana.webp?v=25', './croci-cavi.webp?v=25',
-  './pec-deck.webp?v=25', './push-up.webp?v=25', './dip-petto.webp?v=25',
-  './squat-bilanciere.webp?v=25', './stacco-da-terra.webp?v=25', './lat-machine.webp?v=25',
-  './pulley-basso.webp?v=25', './lento-avanti.webp?v=25', './alzate-laterali.webp?v=25',
-  './curl-manubri.webp?v=25', './pushdown-corda.webp?v=25',
-  './assets/exercises/abduzioni-anca-macchina.webp?v=28',
-  './assets/exercises/affondi-camminata-manubri.webp?v=28',
-  './assets/exercises/alzate-frontali-manubri.webp?v=28',
-  './assets/exercises/alzate-laterali-manubri-poster.webp?v=28',
-  './assets/exercises/alzate-laterali-seduto-busto-inclinato.webp?v=28',
-  './assets/exercises/aperture-inverse-deltoidi-posteriori.webp?v=28',
-  './assets/exercises/calf-raise-seduto-poster.webp?v=28',
-  './assets/exercises/calf-raise-in-piedi-poster.webp?v=28',
-  './assets/exercises/calf-raise-bilanciere-rialzo.webp?v=28',
-  './assets/exercises/chest-press-poster.webp?v=28',
-  './assets/exercises/croci-cavi.webp?v=28',
-  './assets/exercises/croci-cavi-alto-monolaterali.webp?v=28',
-  './assets/exercises/croci-manubri-piana.webp?v=28'
-];
+const CACHE = 'marchesano-gym-v29-network-refresh';
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
+  event.waitUntil(self.skipWaiting());
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('marchesano-gym-') && key !== CACHE).map(key => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
 });
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-    if (response.ok) { const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(event.request, copy)); }
+  const request = event.request;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+
+  const path = url.pathname;
+  const appShell = path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('/app.js') || path.endsWith('/styles.css') || path.endsWith('/manifest.webmanifest') || path.endsWith('/service-worker.js');
+  const guideImage = path.includes('/assets/exercises/') || (/\/(abduzioni-anca-macchina|affondi-camminata-manubri|alzate-frontali-manubri|alzate-laterali-manubri-poster|alzate-laterali-seduto-busto-inclinato|aperture-inverse-deltoidi-posteriori|calf-raise-bilanciere-rialzo|calf-raise-in-piedi-poster|calf-raise-seduto-poster|chest-press-poster|croci-cavi-alto-monolaterali|croci-cavi|croci-manubri-piana)\.webp$/).test(path);
+
+  // Always try the deployed version first for app code and exercise guides.
+  // A failed request may fall back to a previously cached copy for offline use.
+  if (appShell || guideImage) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      try {
+        const response = await fetch(request, { cache: 'no-cache' });
+        if (response && response.ok) await cache.put(request, response.clone());
+        return response;
+      } catch (error) {
+        const cached = await cache.match(request, { ignoreSearch: false });
+        if (cached) return cached;
+        throw error;
+      }
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const response = await fetch(request);
+    if (response && response.ok) await cache.put(request, response.clone());
     return response;
-  }).catch(() => cached)));
+  })());
 });
