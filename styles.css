@@ -255,11 +255,12 @@ svg{display:block;width:1em;height:1em;fill:none;stroke:currentColor;stroke-widt
 /* Marchesano Gym v19: original exercise illustrations */
 .mg-photo-art{background:#08090b!important;display:flex;align-items:center;justify-content:center}.mg-photo-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#08090b}.guided-exercise-art .mg-photo-art img{max-width:100%;max-height:100%}
 
-/* Schede tecniche illustrate Marchesano Gym */
-.mg-guide-image-art{background:#050506!important;overflow:hidden}
-.mg-guide-image-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#050506}
-.mg-guide-image-missing{background:linear-gradient(135deg,#191a20,#08090b)!important}
-.exercise-detail-hero .mg-guide-image-art img{object-fit:cover}
-.exercise-guide-sheet{margin:14px 0 18px;padding:8px;border:1px solid #ff343d55;border-radius:18px;background:#050506;overflow:hidden}
-.exercise-guide-sheet img{display:block;width:100%;height:auto;object-fit:contain;border-radius:11px}
-.exercise-guide-sheet figcaption{padding:10px 5px 3px;color:#ff858b;font-size:9px;font-weight:800;letter-spacing:.08em;line-height:1.5;text-align:center}
+
+/* Marchesano Gym v30 — immagini leggibili in libreria e guide complete nel dettaglio */
+.mg-card-art .mg-poster-art{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#08090b!important}
+.mg-card-art .mg-poster-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#08090b}
+.mg-card-art .mg-poster-thumb img{object-fit:cover;object-position:center}
+.guided-exercise-art .mg-poster-art{width:100%;height:100%;min-height:125px;overflow:hidden;border-radius:14px;background:#08090b!important}
+.guided-exercise-art .mg-poster-art img{width:100%;height:100%;min-height:125px;object-fit:cover;object-position:center}
+.exercise-detail-hero .mg-poster-art{width:100%;height:100%;min-height:100%;background:#08090b!important}
+.exercise-detail-hero .mg-poster-art img{width:100%;height:100%;object-fit:contain;object-position:center;background:#08090b}

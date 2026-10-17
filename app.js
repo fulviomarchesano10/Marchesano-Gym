@@ -332,7 +332,7 @@ function renderGuidedWorkout(){
   if(!activeWorkout)return;
   const w=activeWorkout;
   $('toolTitle').textContent='Allenamento in corso';
-  $('toolContent').innerHTML=`<section class="active-workout-header"><div><p class="eyebrow">SESSIONE ATTIVA</p><h2>${escapeHtml(w.plan.name)}</h2><p class="muted">${w.items.length} esercizi · modifica carichi e ripetizioni mentre ti alleni</p></div><div class="live-pill"><i></i> IN CORSO</div></section><div class="workout-toolbar"><label>Recupero predefinito (sec)<input id="workoutRestDefault" type="number" min="0" max="600" step="5" value="90"></label><div class="rest-clock" id="restClock"><span>RECUPERO</span><strong id="restTime">01:30</strong><button id="timerToggle" class="secondary-button" type="button">▶ Avvia timer</button><button id="timerReset" class="text-button" type="button">Azzera</button></div></div><div class="guided-exercise-list">${w.items.map((it,i)=>{const x=it.exercise;return `<article class="guided-exercise" data-ex-index="${i}"><div class="guided-exercise-top"><div class="guided-exercise-art">${exerciseVisual(x)}</div><div class="guided-exercise-info"><span class="exercise-number">ESERCIZIO ${String(i+1).padStart(2,'0')}</span><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.muscle_group||'Altro')} · ${escapeHtml(x.equipment||'Attrezzatura varia')}</p><details><summary>Come si esegue</summary><p>${escapeHtml(exerciseGuide(x))}</p></details></div></div><div class="sets-table-wrap"><table class="sets-table"><thead><tr><th>Serie</th><th>Kg</th><th>Rip.</th><th>Fatta</th></tr></thead><tbody>${w.sets[i].map((set,j)=>`<tr data-set-row="${j}"><td>${j+1}</td><td><input aria-label="Chili serie ${j+1}" data-field="weight_kg" type="number" min="0" max="1000" step="0.5" value="${set.weight_kg}" inputmode="decimal"></td><td><input aria-label="Ripetizioni serie ${j+1}" data-field="reps" type="number" min="1" max="200" step="1" value="${set.reps}" inputmode="numeric"></td><td><button class="set-done ${set.completed?'is-done':''}" data-complete-set="${j}" type="button" aria-label="Segna serie ${j+1} completata">${set.completed?'✓':'○'}</button></td></tr>`).join('')}</tbody></table></div><div class="exercise-set-footer"><button class="secondary-button add-set-btn" data-add-set="${i}" type="button">＋ Aggiungi serie</button><span class="set-progress">${w.sets[i].filter(s=>s.completed).length}/${w.sets[i].length} serie completate</span></div></article>`}).join('')}</div><div class="finish-workout-panel"><div><p class="eyebrow">OTTIMO LAVORO</p><h3>Hai finito la sessione?</h3><p>Salveremo durata, serie, ripetizioni e carichi registrati.</p></div><button id="finishWorkoutBtn" class="primary-button finish-workout-button" type="button">✓ Completa allenamento</button><button id="cancelWorkoutBtn" class="secondary-button" type="button">Esci senza completare</button><p id="workoutSaveMessage" class="status-message"></p></div>`;
+  $('toolContent').innerHTML=`<section class="active-workout-header"><div><p class="eyebrow">SESSIONE ATTIVA</p><h2>${escapeHtml(w.plan.name)}</h2><p class="muted">${w.items.length} esercizi · modifica carichi e ripetizioni mentre ti alleni</p></div><div class="live-pill"><i></i> IN CORSO</div></section><div class="workout-toolbar"><label>Recupero predefinito (sec)<input id="workoutRestDefault" type="number" min="0" max="600" step="5" value="90"></label><div class="rest-clock" id="restClock"><span>RECUPERO</span><strong id="restTime">01:30</strong><button id="timerToggle" class="secondary-button" type="button">▶ Avvia timer</button><button id="timerReset" class="text-button" type="button">Azzera</button></div></div><div class="guided-exercise-list">${w.items.map((it,i)=>{const x=it.exercise;return `<article class="guided-exercise" data-ex-index="${i}"><div class="guided-exercise-top"><div class="guided-exercise-art">${exerciseVisual(x, true)}</div><div class="guided-exercise-info"><span class="exercise-number">ESERCIZIO ${String(i+1).padStart(2,'0')}</span><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.muscle_group||'Altro')} · ${escapeHtml(x.equipment||'Attrezzatura varia')}</p><details><summary>Come si esegue</summary><p>${escapeHtml(exerciseGuide(x))}</p></details></div></div><div class="sets-table-wrap"><table class="sets-table"><thead><tr><th>Serie</th><th>Kg</th><th>Rip.</th><th>Fatta</th></tr></thead><tbody>${w.sets[i].map((set,j)=>`<tr data-set-row="${j}"><td>${j+1}</td><td><input aria-label="Chili serie ${j+1}" data-field="weight_kg" type="number" min="0" max="1000" step="0.5" value="${set.weight_kg}" inputmode="decimal"></td><td><input aria-label="Ripetizioni serie ${j+1}" data-field="reps" type="number" min="1" max="200" step="1" value="${set.reps}" inputmode="numeric"></td><td><button class="set-done ${set.completed?'is-done':''}" data-complete-set="${j}" type="button" aria-label="Segna serie ${j+1} completata">${set.completed?'✓':'○'}</button></td></tr>`).join('')}</tbody></table></div><div class="exercise-set-footer"><button class="secondary-button add-set-btn" data-add-set="${i}" type="button">＋ Aggiungi serie</button><span class="set-progress">${w.sets[i].filter(s=>s.completed).length}/${w.sets[i].length} serie completate</span></div></article>`}).join('')}</div><div class="finish-workout-panel"><div><p class="eyebrow">OTTIMO LAVORO</p><h3>Hai finito la sessione?</h3><p>Salveremo durata, serie, ripetizioni e carichi registrati.</p></div><button id="finishWorkoutBtn" class="primary-button finish-workout-button" type="button">✓ Completa allenamento</button><button id="cancelWorkoutBtn" class="secondary-button" type="button">Esci senza completare</button><p id="workoutSaveMessage" class="status-message"></p></div>`;
   showToolPage('workout');
   $('toolContent').querySelectorAll('[data-ex-index]').forEach(card=>{const i=Number(card.dataset.exIndex);card.querySelectorAll('[data-field]').forEach(input=>input.addEventListener('change',()=>{const j=Number(input.closest('[data-set-row]').dataset.setRow);activeWorkout.sets[i][j][input.dataset.field]=Number(input.value)||0;}));card.querySelectorAll('[data-complete-set]').forEach(btn=>btn.addEventListener('click',()=>{const j=Number(btn.dataset.completeSet);const set=activeWorkout.sets[i][j];set.completed=!set.completed;const val=Number($('workoutRestDefault').value)||90;if(set.completed&&val>0)startRestTimer(val);renderGuidedWorkoutPreserveScroll();}));});
   $('toolContent').querySelectorAll('[data-add-set]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.addSet);if(activeWorkout.sets[i].length>=20)return;activeWorkout.sets[i].push({set_number:activeWorkout.sets[i].length+1,reps:10,weight_kg:0,completed:false});renderGuidedWorkoutPreserveScroll();}));
@@ -493,7 +493,7 @@ function localizeEquipment(value) {
 }
 
 EXERCISE_CATALOG.forEach(item => { item.name = localizeExerciseName(item.name); item.equipment = localizeEquipment(item.equipment); });
-function exerciseVisual(item) {
+function exerciseVisual(item, compact = false) {
   const name = String(item?.name || '').toLocaleLowerCase('it').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const id = String(item?.catalog_id || item?.exercise_id || item?.id || '').toLocaleLowerCase('it');
   // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
@@ -525,25 +525,41 @@ function exerciseVisual(item) {
   const nameKey = name.replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
   // Guide fotografiche create per Marchesano Gym: priorità alle immagini esatte dell'esercizio.
   // Se non esiste una guida corrispondente, non viene mostrata una foto di un esercizio diverso.
+  const posterById = {
+    'abduzione-anca':'abduzioni-anca-macchina.webp',
+    'affondi-manubri':'affondi-camminata-manubri.webp',
+    'alzate-frontali':'alzate-frontali-manubri.webp',
+    'alzate-laterali':'alzate-laterali-manubri-poster.webp',
+    'alzate-laterali-pendolo-seduto':'alzate-laterali-seduto-busto-inclinato.webp',
+    'reverse-fly':'aperture-inverse-deltoidi-posteriori.webp',
+    'calf-raise':'calf-raise-in-piedi-poster.webp',
+    'calf-raise-seduto':'calf-raise-seduto-poster.webp',
+    'calf-raise-bilanciere-rialzo':'calf-raise-bilanciere-rialzo.webp',
+    'chest-press':'chest-press-poster.webp',
+    'croci-cavi':'croci-cavi.webp',
+    'croci-cavo-alto-monolaterali':'croci-cavi-alto-monolaterali.webp',
+    'croci-manubri-piana':'croci-manubri-piana.webp'
+  };
   const posterByName = [
-    [/^abduzioni dell anca alla macchina$/, 'abduzioni-anca-macchina.webp'],
-    [/^affondi in camminata con manubri$/, 'affondi-camminata-manubri.webp'],
+    [/^(abduzioni dell anca alla macchina|abduzioni anca macchina)$/, 'abduzioni-anca-macchina.webp'],
+    [/^(affondi in camminata con manubri|affondi camminata manubri)$/, 'affondi-camminata-manubri.webp'],
     [/^alzate frontali con manubri$/, 'alzate-frontali-manubri.webp'],
     [/^alzate laterali con manubri$/, 'alzate-laterali-manubri-poster.webp'],
-    [/^alzate laterali seduto a busto inclinato$/, 'alzate-laterali-seduto-busto-inclinato.webp'],
-    [/^aperture inverse per deltoidi posteriori$/, 'aperture-inverse-deltoidi-posteriori.webp'],
+    [/^(alzate laterali seduto a busto inclinato|alzate laterali busto inclinato)$/, 'alzate-laterali-seduto-busto-inclinato.webp'],
+    [/^(aperture inverse per deltoidi posteriori|aperture inverse|reverse fly)$/, 'aperture-inverse-deltoidi-posteriori.webp'],
     [/^(calf raise da seduto|calf raise seduto)$/, 'calf-raise-seduto-poster.webp'],
     [/^calf raise in piedi$/, 'calf-raise-in-piedi-poster.webp'],
     [/^calf raise in piedi con bilanciere su rialzo$/, 'calf-raise-bilanciere-rialzo.webp'],
     [/^chest press alla macchina$/, 'chest-press-poster.webp'],
     [/^croci ai cavi$/, 'croci-cavi.webp'],
-    [/^croci al cavo alto monolaterali$/, 'croci-cavi-alto-monolaterali.webp'],
-    [/^croci con manubri su panca piana$/, 'croci-manubri-piana.webp']
+    [/^(croci al cavo alto monolaterali|croci cavo alto monolaterali)$/, 'croci-cavi-alto-monolaterali.webp'],
+    [/^(croci con manubri su panca piana|croci manubri panca piana)$/, 'croci-manubri-piana.webp']
   ];
-  const poster = posterByName.find(([pattern]) => pattern.test(nameKey));
-  if (poster) {
-    const file = poster[1];
-    return `<div class="mg-exercise-art mg-photo-art mg-poster-art" role="img" aria-label="Guida tecnica: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=29" alt="Guida tecnica ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(!this.dataset.rootFallback){this.dataset.rootFallback='1';this.src='./${file}?v=29'}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
+  const posterFile = posterById[id] || (posterByName.find(([pattern]) => pattern.test(nameKey)) || [null, null])[1];
+  if (posterFile) {
+    const fullFile = posterFile;
+    const file = compact ? fullFile.replace(/\.webp$/, '-thumb.webp') : fullFile;
+    return `<div class="mg-exercise-art mg-photo-art mg-poster-art${compact ? ' mg-poster-thumb' : ''}" role="img" aria-label="Guida tecnica: ${escapeHtml(item.name)}"><img src="./${file}?v=30" alt="${compact ? 'Immagine' : 'Guida tecnica'} ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(!this.dataset.rootFallback){this.dataset.rootFallback='1';this.src='./${fullFile}?v=30'}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
   }
   const artByName = [
     [/^(panca piana con bilanciere|distensioni su panca piana con bilanciere|bench press con bilanciere)$/, 'panca-piana-bilanciere'],
@@ -646,7 +662,7 @@ function renderExerciseCatalog() {
   const shown = rows.slice(0,catalogLimit);
   list.innerHTML = shown.map((x) => {
     const idx = EXERCISE_CATALOG.indexOf(x); const favorite=isFavoriteExercise(x);
-    return `<article class="mg-exercise-card" data-open-row="${idx}" tabindex="0" role="button" aria-label="Apri guida: ${escapeHtml(x.name)}"><div class="mg-card-art">${exerciseVisual(x)}<span class="mg-card-level">${escapeHtml(x.level||'Intermedio')}</span><button class="mg-card-star ${favorite?'is-favorite':''}" type="button" data-favorite-index="${idx}" aria-label="${favorite?'Rimuovi dai':'Aggiungi ai'} preferiti">${favorite?'★':'☆'}</button></div><div class="mg-card-body"><div class="mg-card-meta"><span>${escapeHtml(x.muscle_group)}</span><i></i><span>${escapeHtml(x.goal||'Forza')}</span></div><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.equipment)} <span>·</span> ${escapeHtml(x.level||'Intermedio')}</p><div class="mg-card-bottom"><span class="mg-guide-link">GUIDA TECNICA <b>↗</b></span><button class="mg-card-add" type="button" data-catalog-index="${idx}" aria-label="Aggiungi ${escapeHtml(x.name)} alla scheda">＋</button></div></div></article>`;
+    return `<article class="mg-exercise-card" data-open-row="${idx}" tabindex="0" role="button" aria-label="Apri guida: ${escapeHtml(x.name)}"><div class="mg-card-art">${exerciseVisual(x, true)}<span class="mg-card-level">${escapeHtml(x.level||'Intermedio')}</span><button class="mg-card-star ${favorite?'is-favorite':''}" type="button" data-favorite-index="${idx}" aria-label="${favorite?'Rimuovi dai':'Aggiungi ai'} preferiti">${favorite?'★':'☆'}</button></div><div class="mg-card-body"><div class="mg-card-meta"><span>${escapeHtml(x.muscle_group)}</span><i></i><span>${escapeHtml(x.goal||'Forza')}</span></div><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.equipment)} <span>·</span> ${escapeHtml(x.level||'Intermedio')}</p><div class="mg-card-bottom"><span class="mg-guide-link">GUIDA TECNICA <b>↗</b></span><button class="mg-card-add" type="button" data-catalog-index="${idx}" aria-label="Aggiungi ${escapeHtml(x.name)} alla scheda">＋</button></div></div></article>`;
   }).join('');
   $('catalogLoadMore').classList.toggle('hidden', rows.length <= catalogLimit);
   list.querySelectorAll('[data-open-row]').forEach(row=>{
