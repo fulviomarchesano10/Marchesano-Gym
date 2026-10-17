@@ -1,4 +1,4 @@
-const CACHE = 'marchesano-gym-v21-immagini-incluse';
+const CACHE = 'marchesano-gym-v22-immagini-incluse';
 const CORE = [
   './', './index.html', './styles.css?v=23', './app.js?v=25', './manifest.webmanifest?v=22',
   './apple-touch-icon.png', './icon-192.png?v=21', './icon-512.png?v=21',

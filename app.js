@@ -499,7 +499,7 @@ function exerciseVisual(item) {
   // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
   // consigliata assets/exercises sia i file caricati per errore nella root.
   const customArt = (
-    id === 'panca-piana-bilanciere' || (/panca piana/.test(name) && /bilanciere/.test(name) && !/manubri|multipower|presa stretta|pausa/.test(name)) || /distensioni panca piana bilanciere/.test(name) ? 'panca-piana-bilanciere' :
+    id === 'panca-piana-bilanciere' || (/panca piana/.test(name) && /bilanciere/.test(name) && !/manubri|multipower|presa stretta|pausa|french press|tricipiti|skull crusher|estensioni/.test(name)) || (/distensioni panca piana bilanciere/.test(name) && !/french press|tricipiti|skull crusher|estensioni/.test(name)) ? 'panca-piana-bilanciere' :
     id === 'panca-inclinata-manubri' || /panca inclinata con manubri|spinte panca inclinata con manubri/.test(name) ? 'panca-inclinata-manubri' :
     id === 'squat-bilanciere' || /squat con bilanciere/.test(name) ? 'squat-bilanciere' :
     id === 'stacco-da-terra' || id === 'stacco-convenzionale' || /stacco da terra/.test(name) ? 'stacco-da-terra' :
@@ -507,7 +507,7 @@ function exerciseVisual(item) {
     id === 'pulley-basso' || /pulley basso/.test(name) ? 'pulley-basso' :
     id === 'lento-avanti' || id === 'military-press' || /lento avanti|military press/.test(name) ? 'lento-avanti' :
     id === 'alzate-laterali' || /alzate laterali con manubri/.test(name) ? 'alzate-laterali' :
-    id === 'curl-manubri' || /curl con manubri|curl alternato con manubri/.test(name) ? 'curl-manubri' :
+    id === 'curl-manubri' || ((/curl con manubri|curl alternato con manubri/.test(name)) && !/panca inclinata|su panca inclinata|scott|preacher|spider/.test(name) && !/curl-panca-inclinata/.test(id)) ? 'curl-manubri' :
     id === 'pushdown-corda' || /push.?down.*corda|push.?down per tricipiti con corda/.test(name) ? 'pushdown-corda' : ''
   );
   if (customArt) {
