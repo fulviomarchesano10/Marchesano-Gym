@@ -493,28 +493,9 @@ function localizeEquipment(value) {
 }
 
 EXERCISE_CATALOG.forEach(item => { item.name = localizeExerciseName(item.name); item.equipment = localizeEquipment(item.equipment); });
-const GUIDE_IMAGES = {
-  'abduzione-anca':'abduzioni-anca-macchina.jpg',
-  'affondi-manubri':'affondi-camminata-manubri.jpg',
-  'alzate-frontali':'alzate-frontali-manubri.jpg',
-  'alzate-laterali':'alzate-laterali-manubri.jpg',
-  'alzate-laterali-pendolo-seduto':'alzate-laterali-seduto-busto-inclinato.jpg',
-  'reverse-fly':'aperture-inverse-deltoidi-posteriori.jpg',
-  'calf-raise-seduto':'calf-raise-seduto.jpg',
-  'calf-raise':'calf-raise-in-piedi.jpg',
-  'calf-raise-bilanciere-rialzo':'calf-raise-bilanciere-rialzo.jpg',
-  'chest-press':'chest-press-macchina.jpg',
-  'croci-cavi':'croci-ai-cavi.jpg',
-  'croci-cavo-alto-monolaterali':'croci-cavo-alto-monolaterali.jpg',
-  'croci-manubri-piana':'croci-manubri-panca-piana.jpg'
-};
-function exerciseVisual(item, mode = 'card') {
+function exerciseVisual(item) {
   const name = String(item?.name || '').toLocaleLowerCase('it').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const id = String(item?.catalog_id || item?.exercise_id || item?.id || '').toLocaleLowerCase('it');
-  const guideFile = GUIDE_IMAGES[id];
-  if (guideFile) {
-    return `<div class="mg-exercise-art mg-guide-image-art" role="img" aria-label="Guida illustrata: ${escapeHtml(item.name)}"><img src="./exercise-guides/${guideFile}?v=1" alt="Guida tecnica di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.parentElement.classList.add('mg-guide-image-missing');this.remove()"></div>`;
-  }
   // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
   // consigliata assets/exercises sia i file caricati per errore nella root.
   // Mappatura esplicita: usa l'ID quando è quello del catalogo, altrimenti il nome normalizzato.
@@ -542,6 +523,28 @@ function exerciseVisual(item, mode = 'card') {
     'pushdown-corda':'pushdown-corda'
   };
   const nameKey = name.replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+  // Guide fotografiche create per Marchesano Gym: priorità alle immagini esatte dell'esercizio.
+  // Se non esiste una guida corrispondente, non viene mostrata una foto di un esercizio diverso.
+  const posterByName = [
+    [/^abduzioni dell anca alla macchina$/, 'abduzioni-anca-macchina.webp'],
+    [/^affondi in camminata con manubri$/, 'affondi-camminata-manubri.webp'],
+    [/^alzate frontali con manubri$/, 'alzate-frontali-manubri.webp'],
+    [/^alzate laterali con manubri$/, 'alzate-laterali-manubri-poster.webp'],
+    [/^alzate laterali seduto a busto inclinato$/, 'alzate-laterali-seduto-busto-inclinato.webp'],
+    [/^aperture inverse per deltoidi posteriori$/, 'aperture-inverse-deltoidi-posteriori.webp'],
+    [/^(calf raise da seduto|calf raise seduto)$/, 'calf-raise-seduto-poster.webp'],
+    [/^calf raise in piedi$/, 'calf-raise-in-piedi-poster.webp'],
+    [/^calf raise in piedi con bilanciere su rialzo$/, 'calf-raise-bilanciere-rialzo.webp'],
+    [/^chest press alla macchina$/, 'chest-press-poster.webp'],
+    [/^croci ai cavi$/, 'croci-cavi.webp'],
+    [/^croci al cavo alto monolaterali$/, 'croci-cavi-alto-monolaterali.webp'],
+    [/^croci con manubri su panca piana$/, 'croci-manubri-piana.webp']
+  ];
+  const poster = posterByName.find(([pattern]) => pattern.test(nameKey));
+  if (poster) {
+    const file = poster[1];
+    return `<div class="mg-exercise-art mg-photo-art mg-poster-art" role="img" aria-label="Guida tecnica: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=27" alt="Guida tecnica ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')" /></div>`;
+  }
   const artByName = [
     [/^(panca piana con bilanciere|distensioni su panca piana con bilanciere|bench press con bilanciere)$/, 'panca-piana-bilanciere'],
     [/^(panca piana con manubri|distensioni su panca piana con manubri)$/, 'panca-piana-manubri'],
@@ -665,7 +668,7 @@ function openExerciseDetail(item){
   if(!item)return;
   const plan=activePlanForExercise;
   toolBackAction=()=>openExerciseLibrary(plan);
-  openTool(item.name,`<section class="exercise-detail-page"><button id="detailBackToLibrary" class="secondary-button" type="button">← Torna agli esercizi</button><div class="exercise-detail-hero">${exerciseVisual(item)}</div>${GUIDE_IMAGES[String(item.catalog_id || item.exercise_id || item.id || '').toLocaleLowerCase('it')] ? `<figure class="exercise-guide-sheet"><img src="./exercise-guides/${GUIDE_IMAGES[String(item.catalog_id || item.exercise_id || item.id || '').toLocaleLowerCase('it')]}?v=1" alt="Scheda tecnica completa: ${escapeHtml(item.name)}" loading="lazy"><figcaption>GUIDA VISIVA · POSIZIONE INIZIALE E FINALE, MUSCOLI COINVOLTI E CONSIGLI TECNICI</figcaption></figure>` : ''}<div class="exercise-detail-heading"><p class="eyebrow">GUIDA ALL’ESERCIZIO</p><h2>${escapeHtml(item.name)}</h2><div class="exercise-detail-tags"><span>${escapeHtml(item.muscle_group||'Altro')}</span><span>${escapeHtml(item.equipment||'Attrezzatura varia')}</span></div></div><div class="mg-detail-quickfacts"><div><span>OBIETTIVO</span><strong>${escapeHtml(item.goal||'Forza e massa')}</strong></div><div><span>LIVELLO</span><strong>${escapeHtml(item.level||'Intermedio')}</strong></div><div><span>ATTREZZATURA</span><strong>${escapeHtml(item.equipment||'Corpo libero')}</strong></div></div><div class="exercise-detail-panel mg-detail-panel"><p class="eyebrow">MUSCOLI COINVOLTI</p><p>${escapeHtml(MUSCLE_DESCRIPTIONS[item.muscle_group]||'Muscoli coinvolti in base alla variante e alla tecnica.')}</p><p class="eyebrow">ESECUZIONE · PASSO PER PASSO</p><p>${escapeHtml(exerciseGuide(item))}</p><p class="eyebrow">CUE TECNICO</p><p>Controlla la fase di ritorno, mantieni la respirazione regolare e interrompi la serie se perdi la posizione. Aumenta il carico solo quando le ripetizioni restano pulite.</p><p class="exercise-safety-note">La guida è informativa: adatta l’esercizio alla tua esperienza e non allenarti attraverso il dolore.</p></div><button id="detailAddExercise" class="primary-button" type="button">＋ ${plan?'Aggiungi a questa scheda':'Aggiungi a una scheda'} <span>→</span></button></section>`);
+  openTool(item.name,`<section class="exercise-detail-page"><button id="detailBackToLibrary" class="secondary-button" type="button">← Torna agli esercizi</button><div class="exercise-detail-hero">${exerciseVisual(item)}</div><div class="exercise-detail-heading"><p class="eyebrow">GUIDA ALL’ESERCIZIO</p><h2>${escapeHtml(item.name)}</h2><div class="exercise-detail-tags"><span>${escapeHtml(item.muscle_group||'Altro')}</span><span>${escapeHtml(item.equipment||'Attrezzatura varia')}</span></div></div><div class="mg-detail-quickfacts"><div><span>OBIETTIVO</span><strong>${escapeHtml(item.goal||'Forza e massa')}</strong></div><div><span>LIVELLO</span><strong>${escapeHtml(item.level||'Intermedio')}</strong></div><div><span>ATTREZZATURA</span><strong>${escapeHtml(item.equipment||'Corpo libero')}</strong></div></div><div class="exercise-detail-panel mg-detail-panel"><p class="eyebrow">MUSCOLI COINVOLTI</p><p>${escapeHtml(MUSCLE_DESCRIPTIONS[item.muscle_group]||'Muscoli coinvolti in base alla variante e alla tecnica.')}</p><p class="eyebrow">ESECUZIONE · PASSO PER PASSO</p><p>${escapeHtml(exerciseGuide(item))}</p><p class="eyebrow">CUE TECNICO</p><p>Controlla la fase di ritorno, mantieni la respirazione regolare e interrompi la serie se perdi la posizione. Aumenta il carico solo quando le ripetizioni restano pulite.</p><p class="exercise-safety-note">La guida è informativa: adatta l’esercizio alla tua esperienza e non allenarti attraverso il dolore.</p></div><button id="detailAddExercise" class="primary-button" type="button">＋ ${plan?'Aggiungi a questa scheda':'Aggiungi a una scheda'} <span>→</span></button></section>`);
   showToolPage('exercises');
   $('detailBackToLibrary')?.addEventListener('click',()=>openExerciseLibrary(plan));
   $('detailAddExercise')?.addEventListener('click',async()=>{const btn=$('detailAddExercise');btn.disabled=true;btn.textContent='Salvataggio…';try{const saved=await ensureUserExercise(item);if(plan){await addExerciseToPlan(plan,saved);openPlanDetails(plan);message('catalogMessage',`${item.name} aggiunto alla scheda.`);}else openPlanPickerForExercise(item);}catch(err){btn.disabled=false;btn.innerHTML=`＋ ${plan?'Aggiungi a questa scheda':'Aggiungi a una scheda'} <span>→</span>`;const p=document.createElement('p');p.className='status-message';p.textContent=err.message||'Non riesco ad aggiungere l’esercizio.';$('toolContent').append(p);}});
@@ -916,6 +919,6 @@ document.querySelectorAll('#bottomNav [data-nav]').forEach(btn=>btn.addEventList
   if(nav==='history'){activePlanForExercise=null;openTool('Diario allenamenti');return;}
   if(nav==='profile'){activePlanForExercise=null;openProfileView();return;}
 }));
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=26').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=25').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();

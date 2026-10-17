@@ -1,8 +1,8 @@
-const CACHE = 'marchesano-gym-v26-guide-tecniche';
+const CACHE = 'marchesano-gym-v27-guide-tecniche';
 const CORE = [
-  './', './index.html', './styles.css?v=29', './app.js?v=29', './manifest.webmanifest?v=24',
-  './apple-touch-icon.png?v=23', './icon-192.png?v=23', './icon-512.png?v=23',
-  './icon.svg?v=23', './logo-mark.png?v=23', './marchesano-gym-logo.png?v=23',
+  './', './index.html', './styles.css?v=25', './app.js?v=30', './manifest.webmanifest?v=23',
+  './apple-touch-icon.png?v=22', './icon-192.png?v=22', './icon-512.png?v=22',
+  './icon.svg?v=22', './logo-mark.png?v=22', './marchesano-gym-logo.png?v=22',
   './panca-piana-bilanciere.webp?v=25', './panca-piana-manubri.webp?v=25',
   './panca-inclinata-bilanciere.webp?v=25', './panca-inclinata-manubri.webp?v=25',
   './chest-press.webp?v=25', './croci-manubri-piana.webp?v=25', './croci-cavi.webp?v=25',
@@ -10,13 +10,19 @@ const CORE = [
   './squat-bilanciere.webp?v=25', './stacco-da-terra.webp?v=25', './lat-machine.webp?v=25',
   './pulley-basso.webp?v=25', './lento-avanti.webp?v=25', './alzate-laterali.webp?v=25',
   './curl-manubri.webp?v=25', './pushdown-corda.webp?v=25',
-  './exercise-guides/abduzioni-anca-macchina.jpg', './exercise-guides/affondi-camminata-manubri.jpg',
-  './exercise-guides/alzate-frontali-manubri.jpg', './exercise-guides/alzate-laterali-manubri.jpg',
-  './exercise-guides/alzate-laterali-seduto-busto-inclinato.jpg', './exercise-guides/aperture-inverse-deltoidi-posteriori.jpg',
-  './exercise-guides/calf-raise-seduto.jpg', './exercise-guides/calf-raise-in-piedi.jpg',
-  './exercise-guides/calf-raise-bilanciere-rialzo.jpg', './exercise-guides/chest-press-macchina.jpg',
-  './exercise-guides/croci-ai-cavi.jpg', './exercise-guides/croci-cavo-alto-monolaterali.jpg',
-  './exercise-guides/croci-manubri-panca-piana.jpg'
+  './assets/exercises/abduzioni-anca-macchina.webp?v=27',
+  './assets/exercises/affondi-camminata-manubri.webp?v=27',
+  './assets/exercises/alzate-frontali-manubri.webp?v=27',
+  './assets/exercises/alzate-laterali-manubri-poster.webp?v=27',
+  './assets/exercises/alzate-laterali-seduto-busto-inclinato.webp?v=27',
+  './assets/exercises/aperture-inverse-deltoidi-posteriori.webp?v=27',
+  './assets/exercises/calf-raise-seduto-poster.webp?v=27',
+  './assets/exercises/calf-raise-in-piedi-poster.webp?v=27',
+  './assets/exercises/calf-raise-bilanciere-rialzo.webp?v=27',
+  './assets/exercises/chest-press-poster.webp?v=27',
+  './assets/exercises/croci-cavi.webp?v=27',
+  './assets/exercises/croci-cavi-alto-monolaterali.webp?v=27',
+  './assets/exercises/croci-manubri-piana.webp?v=27'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
