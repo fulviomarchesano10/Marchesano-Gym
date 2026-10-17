@@ -543,7 +543,7 @@ function exerciseVisual(item) {
   const poster = posterByName.find(([pattern]) => pattern.test(nameKey));
   if (poster) {
     const file = poster[1];
-    return `<div class="mg-exercise-art mg-photo-art mg-poster-art" role="img" aria-label="Guida tecnica: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=27" alt="Guida tecnica ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')" /></div>`;
+    return `<div class="mg-exercise-art mg-photo-art mg-poster-art" role="img" aria-label="Guida tecnica: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=28" alt="Guida tecnica ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')" /></div>`;
   }
   const artByName = [
     [/^(panca piana con bilanciere|distensioni su panca piana con bilanciere|bench press con bilanciere)$/, 'panca-piana-bilanciere'],
