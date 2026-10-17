@@ -1,4 +1,4 @@
-const CACHE = 'marchesano-gym-v30-image-layout';
+const CACHE = 'marchesano-gym-v31-library-workout-layout';
 self.addEventListener('install', event => { event.waitUntil(self.skipWaiting()); });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('marchesano-gym-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));

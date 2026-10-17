@@ -256,11 +256,19 @@ svg{display:block;width:1em;height:1em;fill:none;stroke:currentColor;stroke-widt
 .mg-photo-art{background:#08090b!important;display:flex;align-items:center;justify-content:center}.mg-photo-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#08090b}.guided-exercise-art .mg-photo-art img{max-width:100%;max-height:100%}
 
 
-/* Marchesano Gym v30 — immagini leggibili in libreria e guide complete nel dettaglio */
+/* Marchesano Gym v31 — immagini complete, nessun ritaglio dei poster tecnici */
 .mg-card-art .mg-poster-art{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#08090b!important}
-.mg-card-art .mg-poster-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;background:#08090b}
-.mg-card-art .mg-poster-thumb img{object-fit:cover;object-position:center}
-.guided-exercise-art .mg-poster-art{width:100%;height:100%;min-height:125px;overflow:hidden;border-radius:14px;background:#08090b!important}
-.guided-exercise-art .mg-poster-art img{width:100%;height:100%;min-height:125px;object-fit:cover;object-position:center}
+.mg-card-art .mg-poster-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:#08090b}
+.mg-card-art .mg-poster-thumb img{object-fit:contain;object-position:center}
+/* Allenamento: immagine grande e intera sopra i dati dell'esercizio */
+.guided-exercise-top{grid-template-columns:minmax(0,1fr);gap:12px;padding:14px}
+.guided-exercise-art{width:100%;min-width:0;aspect-ratio:16/9;height:auto;min-height:0;border-radius:14px;overflow:hidden;background:#08090b;border:1px solid #ffffff12}
+.guided-exercise-art .mg-poster-art{width:100%;height:100%;min-height:0;overflow:hidden;border-radius:0;background:#08090b!important}
+.guided-exercise-art .mg-poster-art img{display:block;width:100%;height:100%;min-height:0;object-fit:contain;object-position:center;background:#08090b}
+.guided-exercise-art .mg-photo-art{width:100%;height:100%;min-height:0}
+.guided-exercise-art .mg-exercise-art{width:100%;height:100%;min-height:0}
 .exercise-detail-hero .mg-poster-art{width:100%;height:100%;min-height:100%;background:#08090b!important}
 .exercise-detail-hero .mg-poster-art img{width:100%;height:100%;object-fit:contain;object-position:center;background:#08090b}
+/* Le anteprime della libreria mostrano il poster intero, senza tagliare testo e passaggi. */
+.mg-card-art{height:178px;background:#08090b}
+@media(max-width:520px){.mg-card-art{height:160px}.guided-exercise-top{grid-template-columns:minmax(0,1fr);gap:10px;padding:11px}.guided-exercise-art{aspect-ratio:16/9}.guided-exercise-info h3{font-size:17px}.guided-exercise-info>p{font-size:12px}}
