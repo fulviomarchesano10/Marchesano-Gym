@@ -1,8 +1,8 @@
-const CACHE = 'marchesano-gym-v20-immagini-fix';
+const CACHE = 'marchesano-gym-v21-immagini-incluse';
 const CORE = [
-  './', './index.html', './styles.css?v=23', './app.js?v=24', './manifest.webmanifest?v=22',
+  './', './index.html', './styles.css?v=23', './app.js?v=25', './manifest.webmanifest?v=22',
   './apple-touch-icon.png', './icon-192.png?v=21', './icon-512.png?v=21',
-  './logo-mark.png', './marchesano-gym-logo.png', './assets/exercises/panca-piana-bilanciere.webp?v=19', './assets/exercises/panca-inclinata-manubri.webp?v=19', './assets/exercises/squat-bilanciere.webp?v=19', './assets/exercises/stacco-da-terra.webp?v=19', './assets/exercises/lat-machine.webp?v=19', './assets/exercises/pulley-basso.webp?v=19', './assets/exercises/lento-avanti.webp?v=19', './assets/exercises/alzate-laterali.webp?v=19', './assets/exercises/curl-manubri.webp?v=19', './assets/exercises/pushdown-corda.webp?v=19', './panca-piana-bilanciere.webp?v=20', './panca-inclinata-manubri.webp?v=20', './squat-bilanciere.webp?v=20', './stacco-da-terra.webp?v=20', './lat-machine.webp?v=20', './pulley-basso.webp?v=20', './lento-avanti.webp?v=20', './alzate-laterali.webp?v=20', './curl-manubri.webp?v=20', './pushdown-corda.webp?v=20'
+  './logo-mark.png', './marchesano-gym-logo.png', './panca-piana-bilanciere.webp?v=21', './panca-inclinata-manubri.webp?v=21', './squat-bilanciere.webp?v=21', './stacco-da-terra.webp?v=21', './lat-machine.webp?v=21', './pulley-basso.webp?v=21', './lento-avanti.webp?v=21', './alzate-laterali.webp?v=21', './curl-manubri.webp?v=21', './pushdown-corda.webp?v=21'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
