@@ -499,6 +499,16 @@ function exerciseVisual(item) {
   // Immagini originali Marchesano Gym. I percorsi supportano sia la cartella
   // consigliata assets/exercises sia i file caricati per errore nella root.
   const customArt = (
+    id === 'panca-piana-bilanciere' ? 'panca-piana-bilanciere' :
+    id === 'panca-piana-manubri' ? 'panca-piana-manubri' :
+    id === 'panca-inclinata-bilanciere' ? 'panca-inclinata-bilanciere' :
+    id === 'panca-inclinata-manubri' ? 'panca-inclinata-manubri' :
+    id === 'chest-press' ? 'chest-press' :
+    id === 'croci-manubri-piana' ? 'croci-manubri-piana' :
+    id === 'croci-cavi' ? 'croci-cavi' :
+    id === 'pec-deck' ? 'pec-deck' :
+    id === 'push-up' ? 'push-up' :
+    id === 'dip-petto' ? 'dip-petto' :
     id === 'panca-piana-bilanciere' || (/panca piana/.test(name) && /bilanciere/.test(name) && !/manubri|multipower|presa stretta|pausa|french press|tricipiti|skull crusher|estensioni/.test(name)) || (/distensioni panca piana bilanciere/.test(name) && !/french press|tricipiti|skull crusher|estensioni/.test(name)) ? 'panca-piana-bilanciere' :
     id === 'panca-inclinata-manubri' || /panca inclinata con manubri|spinte panca inclinata con manubri/.test(name) ? 'panca-inclinata-manubri' :
     id === 'squat-bilanciere' || /squat con bilanciere/.test(name) ? 'squat-bilanciere' :
@@ -512,7 +522,7 @@ function exerciseVisual(item) {
   );
   if (customArt) {
     const file = `${customArt}.webp`;
-    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=21" data-root-fallback="./${file}?v=21" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
+    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=23" data-root-fallback="./${file}?v=23" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
   }
   const muscle = item?.muscle_group || 'Fitness';
   const colors = {Petto:'#ff4b55',Schiena:'#ff6b3d',Spalle:'#f24e68',Bicipiti:'#f75a93',Tricipiti:'#ff5b4d',Gambe:'#f04747',Glutei:'#ef6a43',Polpacci:'#ff784e',Addome:'#ed4554'};
@@ -856,6 +866,6 @@ document.querySelectorAll('#bottomNav [data-nav]').forEach(btn=>btn.addEventList
   if(nav==='history'){activePlanForExercise=null;openTool('Diario allenamenti');return;}
   if(nav==='profile'){activePlanForExercise=null;openProfileView();return;}
 }));
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=21').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=23').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();
