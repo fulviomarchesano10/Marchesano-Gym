@@ -272,3 +272,8 @@ svg{display:block;width:1em;height:1em;fill:none;stroke:currentColor;stroke-widt
 /* Le anteprime della libreria mostrano il poster intero, senza tagliare testo e passaggi. */
 .mg-card-art{height:178px;background:#08090b}
 @media(max-width:520px){.mg-card-art{height:160px}.guided-exercise-top{grid-template-columns:minmax(0,1fr);gap:10px;padding:11px}.guided-exercise-art{aspect-ratio:16/9}.guided-exercise-info h3{font-size:17px}.guided-exercise-info>p{font-size:12px}}
+
+/* Allenamento: controlli recupero sempre visibili durante lo scorrimento */
+.workout-toolbar{position:sticky;top:0;z-index:8;padding:8px 0;background:#0d0e11f2;backdrop-filter:blur(14px);border-radius:0 0 18px 18px;box-shadow:0 8px 18px #0004;align-items:stretch}
+.workout-toolbar label{font-size:12px}.workout-toolbar label input{width:100%}
+@media(max-width:520px){.workout-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:7px}.workout-toolbar label{padding:9px;border-radius:14px;font-size:10px}.workout-toolbar label input{margin-top:5px;min-height:42px;padding:7px}.rest-clock{padding:9px;gap:3px 6px;grid-template-columns:1fr auto}.rest-clock strong{font-size:24px}.rest-clock button{font-size:10px;padding:8px 7px;white-space:nowrap}.rest-clock .text-button{font-size:10px}}
