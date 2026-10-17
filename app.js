@@ -553,7 +553,7 @@ function exerciseVisual(item) {
 
   if (customArt) {
     const file = `${customArt}.webp`;
-    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./assets/exercises/${file}?v=24" data-root-fallback="./${file}?v=24" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="if(this.dataset.rootFallback){const next=this.dataset.rootFallback;delete this.dataset.rootFallback;this.onerror=null;this.src=next}else{this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')}" /></div>`;
+    return `<div class="mg-exercise-art mg-photo-art" role="img" aria-label="Illustrazione Marchesano Gym: ${escapeHtml(item.name)}"><img src="./${file}?v=25" alt="Illustrazione di ${escapeHtml(item.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('mg-photo-missing')" /></div>`;
   }
   const muscle = item?.muscle_group || 'Fitness';
   const colors = {Petto:'#ff4b55',Schiena:'#ff6b3d',Spalle:'#f24e68',Bicipiti:'#f75a93',Tricipiti:'#ff5b4d',Gambe:'#f04747',Glutei:'#ef6a43',Polpacci:'#ff784e',Addome:'#ed4554'};
@@ -897,6 +897,6 @@ document.querySelectorAll('#bottomNav [data-nav]').forEach(btn=>btn.addEventList
   if(nav==='history'){activePlanForExercise=null;openTool('Diario allenamenti');return;}
   if(nav==='profile'){activePlanForExercise=null;openProfileView();return;}
 }));
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=24').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=25').catch(()=>{}));
 window.addEventListener('pageshow', () => { if (currentUser) window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 loadApp();

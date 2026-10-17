@@ -1,24 +1,15 @@
-const CACHE = 'marchesano-gym-v23-immagini-corrette-1';
+const CACHE = 'marchesano-gym-v25-immagini-fix';
 const CORE = [
-  './', './index.html', './styles.css?v=23', './app.js?v=27', './manifest.webmanifest?v=22',
-  './apple-touch-icon.png?v=21', './icon-192.png?v=21', './icon-512.png?v=21',
-  './logo-mark.png', './marchesano-gym-logo.png',
-  './panca-piana-bilanciere.webp?v=24', './panca-piana-manubri.webp?v=24',
-  './panca-inclinata-bilanciere.webp?v=24', './panca-inclinata-manubri.webp?v=24',
-  './chest-press.webp?v=24', './croci-manubri-piana.webp?v=24', './croci-cavi.webp?v=24',
-  './pec-deck.webp?v=24', './push-up.webp?v=24', './dip-petto.webp?v=24',
-  './squat-bilanciere.webp?v=24', './stacco-da-terra.webp?v=24', './lat-machine.webp?v=24',
-  './pulley-basso.webp?v=24', './lento-avanti.webp?v=24', './alzate-laterali.webp?v=24',
-  './curl-manubri.webp?v=24', './pushdown-corda.webp?v=24',
-  './assets/exercises/panca-piana-bilanciere.webp?v=24', './assets/exercises/panca-piana-manubri.webp?v=24',
-  './assets/exercises/panca-inclinata-bilanciere.webp?v=24', './assets/exercises/panca-inclinata-manubri.webp?v=24',
-  './assets/exercises/chest-press.webp?v=24', './assets/exercises/croci-manubri-piana.webp?v=24',
-  './assets/exercises/croci-cavi.webp?v=24', './assets/exercises/pec-deck.webp?v=24',
-  './assets/exercises/push-up.webp?v=24', './assets/exercises/dip-petto.webp?v=24',
-  './assets/exercises/squat-bilanciere.webp?v=24', './assets/exercises/stacco-da-terra.webp?v=24',
-  './assets/exercises/lat-machine.webp?v=24', './assets/exercises/pulley-basso.webp?v=24',
-  './assets/exercises/lento-avanti.webp?v=24', './assets/exercises/alzate-laterali.webp?v=24',
-  './assets/exercises/curl-manubri.webp?v=24', './assets/exercises/pushdown-corda.webp?v=24'
+  './', './index.html', './styles.css?v=24', './app.js?v=28', './manifest.webmanifest?v=23',
+  './apple-touch-icon.png?v=22', './icon-192.png?v=22', './icon-512.png?v=22',
+  './icon.svg?v=22', './logo-mark.png?v=22', './marchesano-gym-logo.png?v=22',
+  './panca-piana-bilanciere.webp?v=25', './panca-piana-manubri.webp?v=25',
+  './panca-inclinata-bilanciere.webp?v=25', './panca-inclinata-manubri.webp?v=25',
+  './chest-press.webp?v=25', './croci-manubri-piana.webp?v=25', './croci-cavi.webp?v=25',
+  './pec-deck.webp?v=25', './push-up.webp?v=25', './dip-petto.webp?v=25',
+  './squat-bilanciere.webp?v=25', './stacco-da-terra.webp?v=25', './lat-machine.webp?v=25',
+  './pulley-basso.webp?v=25', './lento-avanti.webp?v=25', './alzate-laterali.webp?v=25',
+  './curl-manubri.webp?v=25', './pushdown-corda.webp?v=25'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
